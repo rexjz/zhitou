@@ -14,3 +14,6 @@ workspace members:
 ## 技术选型
 - **关系型数据库：**PostgreSQL
 - **RAG：**[RAGFLOW](https://github.com/infiniflow/ragflow)
+  
+## Code Formatting
+python 文件使用 ruff 作为 formatter，formatter 配置在 ruff.toml 中。开发时请在IDE中配置ruff插件为python文件的formatter，一般都会自动读取项目根目录下的 ruff.toml 配置。
