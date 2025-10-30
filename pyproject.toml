@@ -5,3 +5,11 @@ description = "zhitou mono repo platform"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = []
+
+[tool.uv.workspace]
+members = [
+  "packages/api",
+  "packages/core",
+  "packages/database",
+  "packages/worker",
+]
