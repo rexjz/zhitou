@@ -1,10 +1,18 @@
 [project]
 name = "zhitou"
 version = "0.1.0"
-description = "zhitou mono repo platform"
+description = "zhitou monorepo codebase"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+  "api"
+]
+
+[tool.uv.sources]
+api = { workspace = true }
+
+[dependency-groups]
+dev = ["ruff >= 0.8.1", "pytest >= 8.3.4"]
 
 [tool.uv.workspace]
 members = [
@@ -13,3 +21,10 @@ members = [
   "packages/database",
   "packages/worker",
 ]
+
+[project.scripts]
+api-start = "api.main:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

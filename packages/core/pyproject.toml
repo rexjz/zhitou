@@ -7,7 +7,10 @@ authors = [
     { name = "xujingzhou", email = "max3.xu@outlook.com" }
 ]
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "confz>=2.1.0",
+    "python-dotenv>=1.2.1",
+]
 
 [project.scripts]
 core = "core:main"
