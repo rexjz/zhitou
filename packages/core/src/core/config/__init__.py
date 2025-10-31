@@ -5,4 +5,5 @@ __all__ = [
   "ConfigLoader",
   "DatabaseConfig",
   "ServerConfig",
+  "LoggingConfig"
 ]

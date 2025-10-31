@@ -4,12 +4,11 @@ version = "0.1.0"
 description = "zhitou monorepo codebase"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = [
-  "api"
-]
+dependencies = []
 
-[tool.uv.sources]
-api = { workspace = true }
+# [tool.uv.sources]
+# api = { workspace = true }
+# worker = { workspace = true }
 
 [dependency-groups]
 dev = ["ruff >= 0.8.1", "pytest >= 8.3.4"]
@@ -23,7 +22,8 @@ members = [
 ]
 
 [project.scripts]
-api-start = "api.main:main"
+api-start = "api:main"
+worker-start = "api:main"
 
 [build-system]
 requires = ["hatchling"]
