@@ -8,9 +8,11 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
-    # "core",
+    "core",
     "confz>=2.1.0",
+    "flask>=3.1.2",
     "loguru>=0.7.3",
+    "waitress>=3.0.2",
 ]
 
 [tool.uv.sources]

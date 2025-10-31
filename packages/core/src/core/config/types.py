@@ -1,13 +1,15 @@
 
-from pydantic import BaseModel, Field, IPvAnyAddress
+from pydantic import BaseModel, Field
 
 
 class DatabaseConfig(BaseModel):
   url: str
 
 class ServerConfig(BaseModel):
-  ip: IPvAnyAddress
+  host: str
   port: int
+  debug: bool
+  dev: bool
 
 class LoggingConfig(BaseModel):
   log_file_dir: str
