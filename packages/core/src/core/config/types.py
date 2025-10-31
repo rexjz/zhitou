@@ -4,6 +4,11 @@ from pydantic import BaseModel, Field
 
 class DatabaseConfig(BaseModel):
   url: str
+  port: int
+
+class RedisConfig(BaseModel):
+  url: str
+  port: int
 
 class ServerConfig(BaseModel):
   host: str

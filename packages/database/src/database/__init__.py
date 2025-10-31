@@ -1,2 +1,5 @@
-def main() -> None:
-    print("Hello from database!")
+from .db_manager import DatabaseManager
+
+__all__ = [
+  "DatabaseManager",
+]

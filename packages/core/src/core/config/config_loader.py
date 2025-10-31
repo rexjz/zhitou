@@ -21,12 +21,13 @@ class ConfigLoader:
     env = os.getenv("ENV", "dev")
     default_config_file = "config/config.default.yaml"
     env_specific_config_file = f"config/config.{env}.yaml"
-
+    
     print(f"🔧 Loading {self.config_class.__name__} in environment: {env}")
 
     self.config_class.CONFIG_SOURCES = [
       FileSource(file=default_config_file),
       FileSource(file=env_specific_config_file),
+      EnvSource(allow_all=True, prefix="GLOBAL__", nested_separator="__"),
       EnvSource(allow_all=True, prefix=f"{self.prefix}__", nested_separator="__"),
     ]
 

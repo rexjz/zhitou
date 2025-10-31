@@ -9,14 +9,17 @@ authors = [
 requires-python = ">=3.12"
 dependencies = [
     "core",
+    "database",
     "confz>=2.1.0",
     "flask>=3.1.2",
     "loguru>=0.7.3",
     "waitress>=3.0.2",
+    "sqlalchemy>=2.0.44",
 ]
 
 [tool.uv.sources]
 core = { workspace = true }
+database = { workspace = true }
 
 [project.scripts]
 api = "api:main"
