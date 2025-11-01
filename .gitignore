@@ -10,3 +10,5 @@ wheels/
 # Virtual environments
 .venv
 .logs
+docker/ragflow/ragflow-logs
+docker/history_data_agent
