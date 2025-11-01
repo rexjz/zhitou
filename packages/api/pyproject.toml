@@ -15,6 +15,7 @@ dependencies = [
     "loguru>=0.7.3",
     "waitress>=3.0.2",
     "sqlalchemy>=2.0.44",
+    "psycopg[binary]>=3.2.12",
 ]
 
 [tool.uv.sources]

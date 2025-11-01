@@ -1,0 +1,20 @@
+[project]
+name = "database-migration"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.17.1",
+    "sqlalchemy>=2.0.44",
+    "core",
+    "database"
+]
+
+[tool.uv.sources]
+core = { workspace = true }
+database = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

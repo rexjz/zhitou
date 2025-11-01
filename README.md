@@ -17,3 +17,19 @@ workspace members:
   
 ## Code Formatting
 python 文件使用 ruff 作为 formatter，formatter 配置在 ruff.toml 中。开发时请在IDE中配置ruff插件为python文件的formatter，一般都会自动读取项目根目录下的 ruff.toml 配置。
+
+
+## 常用命令
+> 所有命令在项目根目录运行
+
+### 数据库migration
+```bash
+# 查看当前指针
+uv run --package database_migration alembic -c packages/database_migration/src/database_migration/alembic.ini current
+
+# migration version自动生成
+uv run --package database_migration alembic -c packages/database_migration/src/database_migration/alembic.ini revision --autogenerate -m "<describe the change>"
+
+# apply最新version自动生成
+uv run --package database_migration alembic -c packages/database_migration/src/database_migration/alembic.ini upgrade head
+```
