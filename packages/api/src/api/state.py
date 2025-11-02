@@ -1,7 +1,8 @@
 # state.py
 from dataclasses import dataclass
 from typing import cast
-from database.db_manager import DatabaseManager
+from core.db_manager import DatabaseManager
+from core.repos.user_repo import UserRepository
 from flask import Flask, g, current_app
 from sqlalchemy.orm import Session
 
@@ -9,9 +10,15 @@ _REQUEST_STATE_KEY = "_request_state"
 _APP_STATE_KEY = "_app_state"
 
 @dataclass
+class RepositoriesState():
+  user_repo: UserRepository
+
+@dataclass
 class AppState():
   db_manager: DatabaseManager
-
+  repositories: RepositoriesState
+  
+  
 @dataclass
 class RequestState():
   request_id: str

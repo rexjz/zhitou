@@ -8,9 +8,13 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+    "database",
     "confz>=2.1.0",
     "python-dotenv>=1.2.1",
 ]
+
+[tool.uv.sources]
+database = { workspace = true }
 
 [project.scripts]
 core = "core:main"

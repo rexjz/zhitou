@@ -1,7 +1,7 @@
 
 from confz import BaseConfig
 from core.config.config_loader import ConfigLoader
-from core.config.types import DatabaseConfig, RedisConfig, ServerConfig, LoggingConfig
+from core.config.models import DatabaseConfig, RedisConfig, ServerConfig, LoggingConfig
 
 class APIConfig(BaseConfig):
   database: DatabaseConfig

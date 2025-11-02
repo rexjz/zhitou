@@ -1,6 +1,6 @@
 from confz import BaseConfig
 from core.config.config_loader import ConfigLoader
-from core.config.types import DatabaseConfig, LoggingConfig
+from core.config.models import DatabaseConfig, LoggingConfig
 
 class DBMigrationConfig(BaseConfig):
   database: DatabaseConfig

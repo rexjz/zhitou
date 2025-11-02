@@ -42,7 +42,6 @@ source = { editable = "packages/api" }
 dependencies = [
     { name = "confz" },
     { name = "core" },
-    { name = "database" },
     { name = "flask" },
     { name = "loguru" },
     { name = "psycopg", extra = ["binary"] },
@@ -54,7 +53,6 @@ dependencies = [
 requires-dist = [
     { name = "confz", specifier = ">=2.1.0" },
     { name = "core", editable = "packages/core" },
-    { name = "database", editable = "packages/database" },
     { name = "flask", specifier = ">=3.1.2" },
     { name = "loguru", specifier = ">=0.7.3" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.2.12" },
@@ -113,12 +111,14 @@ version = "0.1.0"
 source = { editable = "packages/core" }
 dependencies = [
     { name = "confz" },
+    { name = "database" },
     { name = "python-dotenv" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "confz", specifier = ">=2.1.0" },
+    { name = "database", editable = "packages/database" },
     { name = "python-dotenv", specifier = ">=1.2.1" },
 ]
 

@@ -1,11 +1,13 @@
 import os
 from api.config import APIConfigLoader, APIConfig
-from core.config.types import LoggingConfig
-from database.db_manager import DatabaseManager
+from core.config.models import LoggingConfig
+from core.db_manager import DatabaseManager
+from core.repos.user_repo import UserRepositoryImpl
 from loguru import logger
 import pathlib
 from api.handlers import app
 from .state import (
+  RepositoriesState,
   init_app_state,
   set_request_state,
   get_app_state,
@@ -38,6 +40,11 @@ def _teardown_state(exc):
   st.db_session.close()
 
 
+def init_repositories_state() -> RepositoriesState:
+  # 在此处绑定repositories的具体实现
+  return RepositoriesState(user_repo=UserRepositoryImpl())
+
+
 @logger.catch()
 def main():
   loader = APIConfigLoader()
@@ -46,11 +53,12 @@ def main():
 
   logger.debug(f"config loaded:\n {json.dumps(config.model_dump(), indent=2)}")
   with app.app_context():
-    # db
     db_manager = DatabaseManager()
-    db_manager.init(config.database.url)    
-    init_app_state(app, AppState(db_manager=db_manager))
-    
+    db_manager.init(config.database.url)
+    init_app_state(
+      app, AppState(db_manager=db_manager, repositories=init_repositories_state())
+    )
+
     if config.server.dev:
       app.run(
         debug=config.server.debug, host=config.server.host, port=config.server.port
