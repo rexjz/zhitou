@@ -3,44 +3,30 @@ from dataclasses import dataclass
 from typing import cast
 from core.db_manager import DatabaseManager
 from core.repos.user_repo import UserRepository
-from flask import Flask, g, current_app
+from fastapi import Request
 from sqlalchemy.orm import Session
-
-_REQUEST_STATE_KEY = "_request_state"
-_APP_STATE_KEY = "_app_state"
+from api.config import APIConfig
 
 @dataclass
-class RepositoriesState():
+class RepositoriesState:
   user_repo: UserRepository
 
+
 @dataclass
-class AppState():
+class AppState:
+  config: APIConfig
   db_manager: DatabaseManager
   repositories: RepositoriesState
-  
-  
+
+
 @dataclass
-class RequestState():
+class RequestState:
   request_id: str
   db_session: Session
 
 
-def set_request_state(state: RequestState) -> None:
-  setattr(g, _REQUEST_STATE_KEY, state)
+def get_app_state_dep(request: Request) -> AppState:
+  return cast(AppState, request.app.state.state)
 
-
-def get_request_state() -> RequestState:
-  state = getattr(g, _REQUEST_STATE_KEY, None)
-  if state is None:
-    raise RuntimeError("RequestState not initialized")
-  return cast(RequestState, state)
-
-
-def init_app_state(app: Flask, state: AppState):
-  app.extensions[_APP_STATE_KEY] = state
-
-def get_app_state() -> AppState:
-  state = current_app.extensions.get(_APP_STATE_KEY, None)
-  if state is None:
-    raise RuntimeError("AppState not initialized")
-  return cast(AppState, state)
+def get_request_state_dep(request: Request) -> AppState:
+  return cast(RequestState, request.state.state)

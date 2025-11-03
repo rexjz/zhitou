@@ -1,17 +1,21 @@
 import os
+import uuid
+import pathlib
+from api.api_models.api_response import APIResponse
 from api.config import APIConfigLoader, APIConfig
+from contextlib import asynccontextmanager
 from core.config.models import LoggingConfig
 from core.db_manager import DatabaseManager
 from core.repos.user_repo import UserRepositoryImpl
+from fastapi import FastAPI, Request
 from loguru import logger
-import pathlib
-from api.handlers import app
+from api.handlers.user import user_router
+
+from typing import cast
+
+import uvicorn
 from .state import (
   RepositoriesState,
-  init_app_state,
-  set_request_state,
-  get_app_state,
-  get_request_state,
   RequestState,
   AppState,
 )
@@ -28,46 +32,63 @@ def _config_logger(config: LoggingConfig):
   )
 
 
-@app.before_request
-def _setup_state():
-  app_state = get_app_state()
-  set_request_state(RequestState(db_session=app_state.db_manager.get_session()))
-
-
-@app.teardown_request
-def _teardown_state(exc):
-  st = get_request_state()
-  st.db_session.close()
-
-
 def init_repositories_state() -> RepositoriesState:
-  # 在此处绑定repositories的具体实现
   return RepositoriesState(user_repo=UserRepositoryImpl())
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+  loader = APIConfigLoader()
+  config: APIConfig = loader.load()
+  _config_logger(config.logging)
+
+  logger.debug(f"config loaded:\n {json.dumps(config.model_dump(), indent=2)}")
+  db_manager = DatabaseManager()
+  db_manager.init(config.database.url)
+  app.state.state = AppState(
+    config=config, db_manager=db_manager, repositories=init_repositories_state()
+  )
+  yield
+  # 清理资源
+
+
+app = FastAPI(lifespan=lifespan)
+
+
+@app.get("/health")
+def health():
+  return APIResponse(message="ok")
+
+
+@app.get("/")
+def root():
+  return "ok"
+
+
+app.include_router(user_router, prefix="/user")
+
+
+@app.middleware("http")
+async def add_request_state(request: Request, call_next):
+  app_state = cast(AppState, request.app.state.state)
+  request.state.state = RequestState(
+    db_session=app_state.db_manager.get_session(), request_id=str(uuid.uuid4())
+  )
+  response = await call_next(request)
+  response.headers["X-Request-ID"] = request.state.state.request_id
+  return response
 
 
 @logger.catch()
 def main():
   loader = APIConfigLoader()
   config: APIConfig = loader.load()
-  _config_logger(config.logging)
-
-  logger.debug(f"config loaded:\n {json.dumps(config.model_dump(), indent=2)}")
-  with app.app_context():
-    db_manager = DatabaseManager()
-    db_manager.init(config.database.url)
-    init_app_state(
-      app, AppState(db_manager=db_manager, repositories=init_repositories_state())
-    )
-
-    if config.server.dev:
-      app.run(
-        debug=config.server.debug, host=config.server.host, port=config.server.port
-      )
-    else:
-      from waitress import serve
-
-      logger.info("waitress start serving in production mode")
-      serve(app, host=config.server.host, port=config.server.port)
+  uvicorn.run(
+    "api.app:app",
+    host=config.server.host,
+    port=config.server.port,
+    reload=config.server.reload,
+  )
 
 
 if __name__ == "__main__":

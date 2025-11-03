@@ -1,9 +1,8 @@
 server:
   host: '0.0.0.0'
-  port: 6000
-  debug: false
-  dev: false
-
+  port: 6008
+  reload: false
+  
 logging:
   log_file_dir: .logs/
   rotation: "00:00"

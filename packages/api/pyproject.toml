@@ -10,11 +10,11 @@ requires-python = ">=3.12"
 dependencies = [
     "core",
     "confz>=2.1.0",
-    "flask>=3.1.2",
     "loguru>=0.7.3",
-    "waitress>=3.0.2",
     "sqlalchemy>=2.0.44",
     "psycopg[binary]>=3.2.12",
+    "fastapi[standard]>=0.120.4",
+    "uvicorn>=0.38.0",
 ]
 
 [tool.uv.sources]

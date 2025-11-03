@@ -13,8 +13,7 @@ class RedisConfig(BaseModel):
 class ServerConfig(BaseModel):
   host: str
   port: int
-  debug: bool
-  dev: bool
+  reload: bool
 
 class LoggingConfig(BaseModel):
   log_file_dir: str
