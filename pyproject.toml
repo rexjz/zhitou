@@ -20,6 +20,7 @@ members = [
   "packages/database",
   "packages/worker",
   "packages/database_migration",
+  "packages/zhitou_agent",
 ]
 
 [project.scripts]
