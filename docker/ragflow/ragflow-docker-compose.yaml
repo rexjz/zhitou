@@ -86,7 +86,7 @@ services:
       retries: 3
     restart: on-failure
 
-  ragflow_minio:
+  ragflow-minio:
     image: quay.io/minio/minio:RELEASE.2025-06-13T11-33-47Z
     command: server --console-address ":9001" /data
     ports:

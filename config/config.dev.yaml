@@ -8,3 +8,6 @@ redis:
 
 server:
   reload: true
+
+ragflow:
+  url: 'http://localhost:9278'
