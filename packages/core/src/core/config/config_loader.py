@@ -16,7 +16,7 @@ class ConfigLoader:
     if not issubclass(self.config_class, BaseConfig):
       raise TypeError("config_class must be child of confz.BaseConfig")
 
-  def load(self):
+  def load(self) -> BaseConfig:
     load_dotenv()
     env = os.getenv("ENV", "dev")
     default_config_file = "config/config.default.yaml"

@@ -10,7 +10,8 @@ requires-python = ">=3.12"
 dependencies = []
 
 [project.scripts]
-worker-start = "worker:main"
+worker = "worker:main"
+annual_report_worker = "worker.annual_report_worker:main"
 
 [build-system]
 requires = ["hatchling"]

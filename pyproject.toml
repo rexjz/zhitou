@@ -4,7 +4,9 @@ version = "0.1.0"
 description = "zhitou monorepo codebase"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "ragflow-sdk>=0.22.0",
+]
 
 # [tool.uv.sources]
 # api = { workspace = true }
@@ -25,7 +27,7 @@ members = [
 
 [project.scripts]
 api-start = "api:main"
-worker-start = "api:main"
+# worker-start = "api:main"
 
 [build-system]
 requires = ["hatchling"]

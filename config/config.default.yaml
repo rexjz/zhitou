@@ -7,3 +7,15 @@ logging:
   log_file_dir: .logs/
   rotation: "00:00"
   log_format: "{time} | {level} | {name}:{function}:{line} - {message}"
+
+redis:
+  url: 'zt_redis'
+  port: 6379
+
+database:
+  url: postgresql+psycopg://postgres:postgres@127.0.0.1:5432/postgres
+  port: 5432
+
+ragflow:
+  url: 'http://ragflow:9278'
+  apikey: ''

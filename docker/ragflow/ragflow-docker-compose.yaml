@@ -1,10 +1,10 @@
 services:
-  es01:
+  ragflow_es01:
     profiles:
       - elasticsearch
     image: elasticsearch:${STACK_VERSION}
     volumes:
-      - esdata01:/usr/share/elasticsearch/data
+      - ragflow_esdata01:/usr/share/elasticsearch/data
     ports:
       - ${ES_PORT}:9200
     env_file: ../../.env
@@ -29,8 +29,7 @@ services:
       interval: 10s
       timeout: 10s
       retries: 120
-    networks:
-      - ragflow
+
     restart: on-failure
 
   sandbox-executor-manager:
@@ -43,8 +42,7 @@ services:
     env_file: ../../.env
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-      - ragflow
+
     security_opt:
       - no-new-privileges:true
     environment:
@@ -61,7 +59,7 @@ services:
       retries: 5
     restart: on-failure
 
-  mysql:
+  ragflow_mysql:
     # mysql:5.7 linux/arm64 image is unavailable.
     image: mysql:8.0.39
     env_file: ../../.env
@@ -78,10 +76,9 @@ services:
     ports:
       - ${MYSQL_PORT}:3306
     volumes:
-      - mysql_data:/var/lib/mysql
+      - ragflow_mysql_data:/var/lib/mysql
       - ./init.sql:/data/application/init.sql
-    networks:
-      - ragflow
+
     healthcheck:
       test: ["CMD", "mysqladmin" ,"ping", "-uroot", "-p${MYSQL_PASSWORD}"]
       interval: 10s
@@ -89,7 +86,7 @@ services:
       retries: 3
     restart: on-failure
 
-  minio:
+  ragflow_minio:
     image: quay.io/minio/minio:RELEASE.2025-06-13T11-33-47Z
     command: server --console-address ":9001" /data
     ports:
@@ -100,9 +97,8 @@ services:
       - MINIO_ROOT_USER=${MINIO_USER}
       - MINIO_ROOT_PASSWORD=${MINIO_PASSWORD}
     volumes:
-      - minio_data:/data
-    networks:
-      - ragflow
+      - ragflow_minio_data:/data
+
     restart: on-failure
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
@@ -138,8 +134,7 @@ services:
     ports:
       - ${TEI_PORT-6380}:80
     env_file: ../../.env
-    networks:
-      - ragflow
+
     command: ["--model-id", "/data/${TEI_MODEL}", "--auto-truncate"]
     restart: on-failure
 
@@ -152,8 +147,7 @@ services:
     ports:
       - ${TEI_PORT-6380}:80
     env_file: ../../.env
-    networks:
-      - ragflow
+
     command: ["--model-id", "/data/${TEI_MODEL}", "--auto-truncate"]
     deploy:
       resources:
@@ -165,30 +159,9 @@ services:
     restart: on-failure
 
 
-  kibana:
-    profiles:
-      - kibana
-    image: kibana:${STACK_VERSION}
-    ports:
-      - ${KIBANA_PORT-5601}:5601
-    env_file: ../../.env
-    volumes:
-      - kibana_data:/usr/share/kibana/data
-    depends_on:
-      es01:
-        condition: service_started
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5601/api/status"]
-      interval: 10s
-      timeout: 10s
-      retries: 120
-    networks:
-      - ragflow
-    restart: on-failure
-
   ragflow-cpu:
     depends_on:
-      mysql:
+      ragflow_mysql:
         condition: service_healthy
     profiles:
       - cpu
@@ -228,8 +201,7 @@ services:
       - ./service_conf.yaml.template:/ragflow/conf/service_conf.yaml.template
       - ./entrypoint.sh:/ragflow/entrypoint.sh
     
-    networks:
-      - ragflow
+
     restart: on-failure
     # https://docs.docker.com/engine/daemon/prometheus/#create-a-prometheus-configuration
     # If you use Docker Desktop, the --add-host flag is optional. This flag ensures that the host's internal IP is exposed to the Prometheus container.
@@ -265,12 +237,11 @@ services:
     image: valkey/valkey:8
     command: redis-server --requirepass infini_rag_flow --maxmemory 128mb --maxmemory-policy allkeys-lru
     env_file: ../../.env
-    ports:
-      - ${REDIS_PORT}:6379
+    # ports:
+    #   - ${REDIS_PORT}:6379
     volumes:
-      - redis_data:/data
-    networks:
-      - ragflow
+      - ragflow_redis_data:/data
+
     restart: on-failure
     healthcheck:
       test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
@@ -280,19 +251,11 @@ services:
       start_period: 10s    
 
 volumes:
-  esdata01:
+  ragflow_esdata01:
     driver: local
-  mysql_data:
+  ragflow_mysql_data:
     driver: local
-  minio_data:
+  ragflow_minio_data:
     driver: local
-  redis_data:
+  ragflow_redis_data:
     driver: local
-  tei_data:
-    driver: local
-  kibana_data:
-    driver: local
-
-networks:
-  ragflow:
-    driver: bridge

@@ -19,3 +19,7 @@ class LoggingConfig(BaseModel):
   log_file_dir: str
   rotation: str
   log_format: str = Field(default="{time} | {level} | {name}:{function}:{line} - {message}")
+
+class RAGFlowConfig(BaseModel):
+  url: str
+  apikey: str
