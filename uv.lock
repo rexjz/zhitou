@@ -204,6 +204,7 @@ dependencies = [
     { name = "database" },
     { name = "python-dotenv" },
     { name = "ragflow-sdk" },
+    { name = "requests" },
 ]
 
 [package.metadata]
@@ -212,6 +213,7 @@ requires-dist = [
     { name = "database", editable = "packages/database" },
     { name = "python-dotenv", specifier = ">=1.2.1" },
     { name = "ragflow-sdk", specifier = ">=0.22.1" },
+    { name = "requests", specifier = ">=2.32.5" },
 ]
 
 [[package]]

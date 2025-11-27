@@ -1,9 +1,7 @@
 from worker.config import WorkerConfigLoader, WorkerConfig
-from urllib.parse import urljoin
-from ragflow_sdk import RAGFlow
-import urllib.request
-import urllib.error
-import json
+from core.integration.ragflow.client import RAGFlowClient
+from core.integration.ragflow.errors import RAGFlowHealthCheckError
+import requests
 
 
 def main() -> None:
@@ -11,16 +9,16 @@ def main() -> None:
   config: WorkerConfig = loader.load()
   print("Hello from worker!")
 
-  rag_object = RAGFlow(api_key=config.ragflow.apikey, base_url=config.ragflow.url)
-  # Make GET request to healthz endpoint using urllib
-  url = urljoin(config.ragflow.url , "/v1/system/healthz")
-  print(url)
+  # Initialize RAGFlowClient
+  rag_client = RAGFlowClient(api_key=config.ragflow.apikey, base_url=config.ragflow.url)
+
+  # Perform health check
   try:
-    with urllib.request.urlopen(url) as response:
-      data = json.loads(response.read().decode())
-      print(data)
-  except urllib.error.HTTPError as e:
-    # Print response even on HTTP errors (non-200 status codes)
-    data = json.loads(e.read().decode())
-    print(f"HTTP Error {e.code}: {data}")
+    health_data = rag_client.health_check()
+    print("RAGFlow health check passed:")
+    print(health_data)
+  except RAGFlowHealthCheckError as e:
+    print(f"RAGFlow health check failed: {e}")
+  except requests.exceptions.RequestException as e:
+    print(f"Request error: {e}")
   
