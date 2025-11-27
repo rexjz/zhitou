@@ -1,7 +1,14 @@
 from core.integration.ragflow.errors import RAGFlowHealthCheckError
-from typing import Dict, Any
+from typing import Dict, Any, Optional, TYPE_CHECKING
 import requests
 from ragflow_sdk import RAGFlow
+
+if TYPE_CHECKING:
+  from core.models.china_mainland_listed_company import (
+    AnnualReportFile,
+    ChinaMainlandListedCompany,
+  )
+
 
 class RAGFlowClient:
   def __init__(self, api_key: str, base_url: str):
@@ -76,3 +83,134 @@ class RAGFlowClient:
     else:
       # Dataset doesn't exist, create it
       return self.rag_flow.create_dataset(name=kb_name)
+
+  @staticmethod
+  def create_annual_report_metadata(
+    stock_code: str, year: str, full_name: str, short_name: str
+  ) -> Dict[str, str]:
+    """
+    Creates metadata dictionary for a China annual report document.
+
+    Metadata Schema:
+      - document_type: "china_annual_report" (constant)
+      - stock_code: Stock code (e.g., "600018")
+      - year: Report year (e.g., "2021")
+      - full_name: Full company name (e.g., "上海国际港务集团股份有限公司")
+      - short_name: Short company name (e.g., "上港集团")
+
+    Args:
+      stock_code: Stock code of the company
+      year: Year of the annual report
+      full_name: Full name of the company
+      short_name: Short name of the company
+
+    Returns:
+      Dictionary containing the metadata fields
+    """
+    return {
+      "document_type": "china_annual_report",
+      "stock_code": stock_code,
+      "year": year,
+      "full_name": full_name,
+      "short_name": short_name,
+    }
+
+  def check_annual_report_exists(
+    self, dataset_id: str, stock_code: str, year: str
+  ) -> bool:
+    """
+    Checks if a China annual report already exists in the knowledge base.
+
+    Args:
+      dataset_id: ID of the dataset to check
+      stock_code: Stock code to search for
+      year: Year to search for
+
+    Returns:
+      True if a document with the given stock_code and year exists, False otherwise
+    """
+    try:
+      dataset = self.rag_flow.list_datasets(id=dataset_id)
+      if not dataset or len(dataset) == 0:
+        return False
+
+      dataset = dataset[0]
+
+      documents = dataset.list_documents(
+        keywords=f"{stock_code}_{year}", page=1, page_size=100
+      )
+
+      for doc in documents:
+        # Note: meta_fields might not be directly accessible via the SDK
+        # This is a best-effort check based on document name
+        if stock_code in doc.name and year in doc.name:
+          return True
+
+      return False
+    except Exception:
+      return False
+
+  def upload_annual_report(
+    self,
+    dataset_id: str,
+    company: "ChinaMainlandListedCompany",
+    report_file: "AnnualReportFile",
+    file_path: str,
+    check_exists: bool = True,
+  ) -> Optional[Any]:
+    """
+    Uploads a China annual report to the knowledge base with proper metadata.
+
+    Args:
+      dataset_id: ID of the dataset to upload to
+      company: ChinaMainlandListedCompany object containing company information
+      report_file: AnnualReportFile object containing report information
+      file_path: Full path to the PDF file (including base_path if applicable)
+      check_exists: If True, check if document already exists before uploading
+
+    Returns:
+      The uploaded Document object, or None if already exists and check_exists=True
+
+    Raises:
+      Exception: If the upload fails
+    """
+    if check_exists and self.check_annual_report_exists(
+      dataset_id, company.code, report_file.year
+    ):
+      return None
+
+    datasets = self.rag_flow.list_datasets(id=dataset_id)
+    if not datasets or len(datasets) == 0:
+      raise ValueError(f"Dataset with ID {dataset_id} not found")
+
+    dataset = datasets[0]
+
+    metadata = self.create_annual_report_metadata(
+      company.code, report_file.year, company.full_name, company.short_name
+    )
+
+    display_name = report_file.get_standardized_display_name(
+      company.code, company.short_name
+    )
+
+    with open(file_path, "rb") as f:
+      blob = f.read()
+
+    dataset.upload_documents([{"display_name": display_name, "blob": blob}])
+
+    documents = dataset.list_documents(keywords=display_name, page=1, page_size=1)
+    if documents and len(documents) > 0:
+      doc = documents[0]
+      try:
+        doc.update({"meta_fields": metadata})
+        return doc
+      except Exception as e:
+        try:
+          dataset.delete_documents(ids=[doc.id])
+        except Exception:
+          pass
+        raise Exception(
+          f"Failed to update metadata for document {display_name}: {e}"
+        ) from e
+
+    return None
