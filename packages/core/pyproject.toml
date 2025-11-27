@@ -11,6 +11,7 @@ dependencies = [
     "database",
     "confz>=2.1.0",
     "python-dotenv>=1.2.1",
+    "ragflow-sdk>=0.22.1",
 ]
 
 [tool.uv.sources]

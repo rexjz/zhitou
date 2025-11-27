@@ -203,6 +203,7 @@ dependencies = [
     { name = "confz" },
     { name = "database" },
     { name = "python-dotenv" },
+    { name = "ragflow-sdk" },
 ]
 
 [package.metadata]
@@ -210,6 +211,7 @@ requires-dist = [
     { name = "confz", specifier = ">=2.1.0" },
     { name = "database", editable = "packages/database" },
     { name = "python-dotenv", specifier = ">=1.2.1" },
+    { name = "ragflow-sdk", specifier = ">=0.22.1" },
 ]
 
 [[package]]
@@ -819,15 +821,15 @@ wheels = [
 
 [[package]]
 name = "ragflow-sdk"
-version = "0.22.0"
+version = "0.22.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "beartype" },
     { name = "requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/dd/59/c60b53483ec2f0f0c8b7cfc9a2b75ea11b13e96b61a14c95c1c7487c61e3/ragflow_sdk-0.22.0.tar.gz", hash = "sha256:02bef4bdea4887d93d416dd8e05b49987dc9d1daa76b0ea95dd27f31ea3e8e05", size = 8618, upload-time = "2025-11-12T06:57:50.796Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/11/8f/7e017437bb1d8b88c9b0e0fb3fde8b909b8734ce2b6ad0d83e9eff00affe/ragflow_sdk-0.22.1.tar.gz", hash = "sha256:7838fabecae2aee1dd03c0eb34934c50607b6d61b7005f9c38c942b38eddf5a9", size = 8609, upload-time = "2025-11-19T12:14:06.188Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7a/75/a15e7439393b975db3a11d176f7e3398ab1f9f76fae2a900c61c9c46fc2a/ragflow_sdk-0.22.0-py3-none-any.whl", hash = "sha256:986c0c7965ded51dacddc532c7c46f61edbe39ccdd115b6ff59c5ada60d5c6b4", size = 15205, upload-time = "2025-11-12T06:57:49.698Z" },
+    { url = "https://files.pythonhosted.org/packages/1c/39/c4ad0b5d818dd4916793fc17aca010d3098ff36dbb104083013d45f87fba/ragflow_sdk-0.22.1-py3-none-any.whl", hash = "sha256:354d2bb7394ef28588fa4043ca2b743c803dd9d043c80c5fb52252af4366d250", size = 15204, upload-time = "2025-11-19T12:14:05.157Z" },
 ]
 
 [[package]]
@@ -1256,14 +1258,17 @@ wheels = [
 name = "worker"
 version = "0.1.0"
 source = { editable = "packages/worker" }
+dependencies = [
+    { name = "ragflow-sdk" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "ragflow-sdk", specifier = ">=0.22.1" }]
 
 [[package]]
 name = "zhitou"
 version = "0.1.0"
 source = { editable = "." }
-dependencies = [
-    { name = "ragflow-sdk" },
-]
 
 [package.dev-dependencies]
 dev = [
@@ -1272,7 +1277,6 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "ragflow-sdk", specifier = ">=0.22.0" }]
 
 [package.metadata.requires-dev]
 dev = [

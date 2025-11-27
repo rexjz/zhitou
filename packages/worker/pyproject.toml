@@ -7,7 +7,9 @@ authors = [
     { name = "xujingzhou", email = "max3.xu@outlook.com" }
 ]
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "ragflow-sdk>=0.22.1",
+]
 
 [project.scripts]
 worker = "worker:main"

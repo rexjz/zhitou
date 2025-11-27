@@ -22,6 +22,18 @@ python 文件使用 ruff 作为 formatter，formatter 配置在 ruff.toml 中。
 ## 常用命令
 > 所有命令在项目根目录运行
 
+### 启动服务
+
+#### api
+```
+uv run --package api api
+```
+
+#### worker
+```
+uv run --package worker annual_report_worker
+```
+
 ### 数据库migration
 ```bash
 # 查看当前指针

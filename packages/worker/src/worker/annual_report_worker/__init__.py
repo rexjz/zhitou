@@ -9,14 +9,9 @@ import json
 def main() -> None:
   loader: WorkerConfigLoader = WorkerConfigLoader()
   config: WorkerConfig = loader.load()
-  print(config)
   print("Hello from worker!")
 
   rag_object = RAGFlow(api_key=config.ragflow.apikey, base_url=config.ragflow.url)
-  print(rag_object.api_url)
-
-  print(rag_object.list_datasets())
-  
   # Make GET request to healthz endpoint using urllib
   url = urljoin(config.ragflow.url , "/v1/system/healthz")
   print(url)
