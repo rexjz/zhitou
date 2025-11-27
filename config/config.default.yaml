@@ -19,3 +19,9 @@ database:
 ragflow:
   url: 'http://ragflow:9278'
   apikey: ''
+  kb_name: 'zhitou_kb'
+
+china_annual_report_soures:
+  listing_file_path: ''
+  base_path: ''
+  

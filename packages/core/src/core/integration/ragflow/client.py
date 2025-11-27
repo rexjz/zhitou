@@ -52,3 +52,27 @@ class RAGFlowClient:
       )
 
     return data
+
+  def ensure_knowledge_base(self, kb_name: str):
+    """
+    Ensures a dataset (knowledge base) exists with the given name.
+    If it doesn't exist, creates it. If it exists, does nothing.
+
+    Args:
+      kb_name: The name of the knowledge base (dataset)
+
+    Returns:
+      The DataSet object (either existing or newly created)
+
+    Raises:
+      Exception: If the operation fails
+    """
+    # Check if dataset already exists
+    datasets = self.rag_flow.list_datasets(name=kb_name)
+
+    if datasets and len(datasets) > 0:
+      # Dataset exists, return the first one
+      return datasets[0]
+    else:
+      # Dataset doesn't exist, create it
+      return self.rag_flow.create_dataset(name=kb_name)

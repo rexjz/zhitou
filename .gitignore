@@ -12,3 +12,4 @@ wheels/
 .logs
 docker/ragflow/ragflow-logs
 docker/history_data_agent
+ragflow_python_api_reference.md

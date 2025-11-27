@@ -1,4 +1,5 @@
 
+from typing import Optional
 from pydantic import BaseModel, Field
 
 
@@ -23,3 +24,8 @@ class LoggingConfig(BaseModel):
 class RAGFlowConfig(BaseModel):
   url: str
   apikey: str
+  kb_name: str
+
+class ChinaAnnualReportSoures(BaseModel):
+  listing_file_path: str
+  base_path: Optional[str]
