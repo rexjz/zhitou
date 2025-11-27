@@ -2,7 +2,7 @@ from core.integration.ragflow.errors import RAGFlowHealthCheckError
 from typing import Dict, Any, Optional, TYPE_CHECKING
 import requests
 from ragflow_sdk import RAGFlow
-
+from loguru import logger
 if TYPE_CHECKING:
   from core.models.china_mainland_listed_company import (
     AnnualReportFile,
@@ -60,29 +60,77 @@ class RAGFlowClient:
 
     return data
 
-  def ensure_knowledge_base(self, kb_name: str):
+  def ensure_knowledge_base(self, kb_name: str, permission: str = "me"):
     """
-    Ensures a dataset (knowledge base) exists with the given name.
-    If it doesn't exist, creates it. If it exists, does nothing.
+    Ensures a dataset (knowledge base) exists with the given name and permissions.
+    If it doesn't exist, creates it. If it exists, verifies access.
+
+    Permission Model:
+      - First checks if dataset exists at all (case-insensitive)
+      - Then checks if current user has access to it
+      - If exists but no access, raises clear PermissionError
+      - If doesn't exist, creates it with specified permission
 
     Args:
       kb_name: The name of the knowledge base (dataset)
+      permission: Permission level for the dataset. Options:
+        - "me": Only you can manage the dataset (default)
+        - "team": All team members can manage the dataset
 
     Returns:
       The DataSet object (either existing or newly created)
 
     Raises:
       Exception: If the operation fails
+      ValueError: If invalid permission value provided
+      PermissionError: If dataset exists but user lacks permission
     """
-    # Check if dataset already exists
-    datasets = self.rag_flow.list_datasets(name=kb_name)
+    # Validate permission parameter
+    if permission not in ["me", "team"]:
+      raise ValueError(f"Invalid permission '{permission}'. Must be 'me' or 'team'")
 
-    if datasets and len(datasets) > 0:
-      # Dataset exists, return the first one
-      return datasets[0]
+    # List all datasets to check existence
+    all_datasets = self.rag_flow.list_datasets()
+    logger.debug(f"Total datasets accessible: {len(all_datasets)}")
+
+    # Check if any dataset has the name we want (case-insensitive)
+    exists = any(ds.name.lower() == kb_name.lower() for ds in all_datasets)
+    logger.debug(f"Dataset '{kb_name}' exists: {exists}")
+
+    if exists:
+      # Dataset exists, check if we have access to it by name
+      datasets_by_name = self.rag_flow.list_datasets(name=kb_name)
+      logger.debug(f"Datasets matching name '{kb_name}': {len(datasets_by_name)}")
+
+      if datasets_by_name and len(datasets_by_name) > 0:
+        # Dataset exists and we have access
+        logger.info(f"Found existing dataset '{kb_name}' with access")
+        return datasets_by_name[0]
+      else:
+        # Dataset exists but we don't have access
+        raise PermissionError(
+          f"Dataset '{kb_name}' exists but you don't have access to it.\n"
+          f"Solutions:\n"
+          f"  1. Ask the dataset owner to grant you '{permission}' permission\n"
+          f"  2. Use a different dataset name (e.g., '{kb_name}_v2')\n"
+          f"  3. If the owner set permission='me', they need to update it to permission='team'\n"
+          f"  4. Delete the existing dataset (if you have admin access) and recreate it"
+        )
     else:
       # Dataset doesn't exist, create it
-      return self.rag_flow.create_dataset(name=kb_name)
+      logger.info(f"Dataset '{kb_name}' doesn't exist, creating with permission='{permission}'")
+      try:
+        return self.rag_flow.create_dataset(name=kb_name, permission=permission)
+      except Exception as e:
+        error_msg = str(e)
+        # This shouldn't happen since we already checked, but handle it gracefully
+        if "lacks permission" in error_msg or "already exists" in error_msg.lower():
+          raise PermissionError(
+            f"Failed to create dataset '{kb_name}'. It may have been created by another process.\n"
+            f"Original error: {error_msg}"
+          ) from e
+        # Re-raise other errors as-is
+        raise
 
   @staticmethod
   def create_annual_report_metadata(
