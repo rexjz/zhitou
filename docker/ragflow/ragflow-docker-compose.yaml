@@ -257,5 +257,9 @@ volumes:
     driver: local
   ragflow_minio_data:
     driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${RAGFLOW_MINIO_DISK_ROOT:+${RAGFLOW_MINIO_DISK_ROOT}/ragflow/minio}
   ragflow_redis_data:
     driver: local

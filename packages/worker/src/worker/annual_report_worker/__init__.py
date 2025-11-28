@@ -1,152 +1,150 @@
 from core.models.china_mainland_listed_company import ChinaAnnualReportList
+from ragflow_sdk import RAGFlow
 from worker.config import WorkerConfigLoader, WorkerConfig
 from core.integration.ragflow.client import RAGFlowClient
 from core.integration.ragflow.errors import RAGFlowHealthCheckError
 import requests
 from tqdm import tqdm
 from pathlib import Path
-import time
-from typing import Set, Dict
-from collections import deque
-
+from typing import Dict
+from loguru import logger
 
 def parse_documents_in_queue(
-  rag_client: RAGFlowClient,
+  rag_client: RAGFlow,
   dataset_id: str,
   document_ids: list[str],
-  max_parallel: int = 5,
-  poll_interval: float = 2.0,
-) -> Dict[str, str]:
+  batch_size: int = 10,
+) -> Dict[str, Dict[str, int | str]]:
   """
-  Parse documents in a queue-based manner with parallel processing.
+  Parse documents in batches using RAGFlow's parse_documents API.
+
+  This function uses the SDK's built-in parse_documents() method which:
+  - Awaits completion of all parsing tasks
+  - Returns detailed results including chunk_count and token_count
+  - Handles keyboard interruption (Ctrl+C) gracefully
 
   Args:
     rag_client: RAGFlowClient instance
     dataset_id: The dataset ID containing the documents
     document_ids: List of document IDs to parse
-    max_parallel: Maximum number of documents to parse in parallel (default: 5)
-    poll_interval: Time in seconds between status checks (default: 2.0)
+    batch_size: Number of documents to parse in each batch (default: 10)
 
   Returns:
-    Dictionary mapping document_id to final status ("DONE", "FAIL", or "CANCEL")
+    Dictionary mapping document_id to result dict with keys:
+      - status: "success", "failed", or "cancelled"
+      - chunk_count: Number of chunks created
+      - token_count: Total tokens processed
   """
   if not document_ids:
     print("No documents to parse")
     return {}
 
-  # Initialize queues and tracking
-  pending_queue = deque(document_ids)
-  active_parsing: Set[str] = set()
-  completed: Dict[str, str] = {}
+  # Get dataset once
+  try:
+    dataset = rag_client.list_datasets(id=dataset_id)[0]
+  except Exception as e:
+    print(f"Error getting dataset: {e}")
+    return {}
 
-  print(f"\nStarting document parsing:")
+  print("\nStarting document parsing:")
   print(f"  Total documents: {len(document_ids)}")
-  print(f"  Max parallel: {max_parallel}")
-  print(f"  Poll interval: {poll_interval}s\n")
+  print(f"  Batch size: {batch_size}\n")
 
+  all_results: Dict[str, Dict[str, int | str]] = {}
+
+  # Process documents in batches
   with tqdm(total=len(document_ids), desc="Parsing documents", unit="doc") as pbar:
-    while pending_queue or active_parsing:
-      # Start new parsing jobs if we have capacity
-      while pending_queue and len(active_parsing) < max_parallel:
-        doc_id = pending_queue.popleft()
-        try:
-          # Get dataset to access documents
-          dataset = rag_client.rag.list_datasets(id=dataset_id)[0]
-          dataset.async_parse_documents([doc_id])
-          active_parsing.add(doc_id)
-          pbar.set_postfix(
-            active=len(active_parsing),
-            pending=len(pending_queue),
-            completed=len(completed)
-          )
-        except Exception as e:
-          print(f"\nError starting parse for document {doc_id}: {e}")
-          completed[doc_id] = "FAIL"
+    for i in range(0, len(document_ids), batch_size):
+      batch = document_ids[i:i + batch_size]
+      batch_num = i // batch_size + 1
+      total_batches = (len(document_ids) + batch_size - 1) // batch_size
+
+      pbar.set_description(f"Parsing batch {batch_num}/{total_batches}")
+
+      try:
+        # Use SDK's parse_documents which awaits completion
+        finished = dataset.parse_documents(batch)
+
+        # Process results
+        for doc_id, status, chunk_count, token_count in finished:
+          all_results[doc_id] = {
+            "status": status,
+            "chunk_count": chunk_count,
+            "token_count": token_count,
+          }
+
+          # Log failures
+          if status == "failed":
+            pbar.write(f"Failed: {doc_id}")
+
           pbar.update(1)
 
-      # Check status of active parsing jobs
-      if active_parsing:
-        time.sleep(poll_interval)
+      except KeyboardInterrupt:
+        pbar.write("\nParsing interrupted by user. Pending tasks have been cancelled.")
+        # Mark remaining documents as cancelled
+        for doc_id in batch:
+          if doc_id not in all_results:
+            all_results[doc_id] = {
+              "status": "cancelled",
+              "chunk_count": 0,
+              "token_count": 0,
+            }
+        break
 
-        try:
-          # Get dataset and check document statuses
-          dataset = rag_client.rag.list_datasets(id=dataset_id)[0]
-
-          # Check each active document
-          finished_docs = []
-          for doc_id in active_parsing:
-            try:
-              docs = dataset.list_documents(id=doc_id)
-              if docs:
-                doc = docs[0]
-                # Check if parsing is complete
-                if doc.run in ["DONE", "FAIL", "CANCEL"]:
-                  completed[doc_id] = doc.run
-                  finished_docs.append(doc_id)
-                  pbar.update(1)
-
-                  # Update description with latest status
-                  if doc.run == "FAIL":
-                    pbar.write(f"Failed: {doc_id} - {doc.progress_msg}")
-            except Exception as e:
-              print(f"\nError checking status for {doc_id}: {e}")
-              completed[doc_id] = "FAIL"
-              finished_docs.append(doc_id)
-              pbar.update(1)
-
-          # Remove finished documents from active set
-          for doc_id in finished_docs:
-            active_parsing.remove(doc_id)
-
-          pbar.set_postfix(
-            active=len(active_parsing),
-            pending=len(pending_queue),
-            completed=len(completed)
-          )
-
-        except Exception as e:
-          print(f"\nError checking document statuses: {e}")
-          time.sleep(poll_interval * 2)  # Wait longer on error
+      except Exception as e:
+        pbar.write(f"\nError parsing batch {batch_num}: {e}")
+        # Mark batch documents as failed
+        for doc_id in batch:
+          if doc_id not in all_results:
+            all_results[doc_id] = {
+              "status": "failed",
+              "chunk_count": 0,
+              "token_count": 0,
+            }
+        pbar.update(len(batch))
 
   # Print summary
   print("\nParsing complete:")
-  success_count = sum(1 for status in completed.values() if status == "DONE")
-  fail_count = sum(1 for status in completed.values() if status == "FAIL")
-  cancel_count = sum(1 for status in completed.values() if status == "CANCEL")
+  success_count = sum(1 for r in all_results.values() if r["status"] == "success")
+  fail_count = sum(1 for r in all_results.values() if r["status"] == "failed")
+  cancel_count = sum(1 for r in all_results.values() if r["status"] == "cancelled")
+  total_chunks = sum(r["chunk_count"] for r in all_results.values())
+  total_tokens = sum(r["token_count"] for r in all_results.values())
 
   print(f"  Success: {success_count}")
   print(f"  Failed: {fail_count}")
   print(f"  Cancelled: {cancel_count}")
+  print(f"  Total chunks: {total_chunks}")
+  print(f"  Total tokens: {total_tokens}")
 
-  return completed
+  return all_results
 
 
 def main() -> None:
   loader: WorkerConfigLoader = WorkerConfigLoader()
   config: WorkerConfig = loader.load()
-  print("Hello from worker!")
 
   rag_client = RAGFlowClient(api_key=config.ragflow.apikey, base_url=config.ragflow.url)
   try:
     health_data = rag_client.health_check()
-    print("RAGFlow health check passed:")
-    print(health_data)
+    logger.info("RAGFlow health check passed:")
+    logger.info(health_data)
   except RAGFlowHealthCheckError as e:
-    print(f"RAGFlow health check failed: {e}")
+    logger.error(f"RAGFlow health check failed: {e}")
     return
   except requests.exceptions.RequestException as e:
-    print(f"Request error: {e}")
+    logger.error(f"Request error: {e}")
     return
 
   try:
     kb = rag_client.ensure_knowledge_base(config.ragflow.kb_name)
-    print(f"Knowledge base '{config.ragflow.kb_name}' is ready (ID: {kb.id})")
+    logger.info(f"Knowledge base '{config.ragflow.kb_name}' is ready (ID: {kb.id})")
   except Exception as e:
-    print(f"Failed to ensure knowledge base: {e}")
+    logger.error(f"Failed to ensure knowledge base: {e}")
     return
 
   # Load annual report list
-  print("Loading annual report list...")
+  logger.info("Loading annual report list...")
   report_list = ChinaAnnualReportList.from_file(
     file_path=config.china_annual_report_soures.listing_file_path,
     base_path=config.china_annual_report_soures.base_path,
@@ -205,15 +203,14 @@ def main() -> None:
   print(f"  Skipped (already exists): {skipped}")
   print(f"  Failed: {failed}")
 
-  # Parse uploaded documents in queue
+  # Parse uploaded documents in batches
   if uploaded_doc_ids:
     print(f"\nStarting to parse {len(uploaded_doc_ids)} newly uploaded documents...")
     parse_documents_in_queue(
       rag_client=rag_client.rag_flow,
       dataset_id=kb.id,
       document_ids=uploaded_doc_ids,
-      max_parallel=5,  # Default to 5 parallel parsing jobs
-      poll_interval=2.0,
+      batch_size=10,  # Process 10 documents per batch
     )
   else:
     print("\nNo newly uploaded documents to parse.")
