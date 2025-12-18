@@ -4,9 +4,14 @@ from api.api_models.api_response import APIResponse
 from fastapi import Depends
 from api.state import get_app_state_dep, get_request_state_dep, AppState, RequestState
 from core.models.user import CreatePasswordAuthUserDto
+from pydantic import BaseModel
 
 user_router = APIRouter(tags=["User"])
 
+
+class SignUpRequest(BaseModel):
+  username: str
+  password: str
 
 @user_router.post("/signup")
 def signup(
@@ -18,3 +23,5 @@ def signup(
     request_state.db_session, data
   )
   return APIResponse(message="ok")
+
+

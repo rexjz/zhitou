@@ -11,3 +11,4 @@ class APIResponse(BaseModel, Generic[T]):
   message: str = Field(default="")
   code: int = Field(default=0)
   data: Optional[T] = None
+
