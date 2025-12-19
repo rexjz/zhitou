@@ -3,17 +3,22 @@ from agentscope.agent import ReActAgent, UserAgent
 from agentscope.model import DashScopeChatModel
 from agentscope.formatter import DashScopeChatFormatter
 from agentscope.memory import InMemoryMemory
-from agentscope.tool import Toolkit
+from agentscope.tool import Toolkit, execute_python_code
 from loguru import logger
 from zhitou_agent.config import AgentConfigLoader
+from zhitou_agent.tools.bocha_web_search import BoChaTools
 
 async def agent_test():
+  config = AgentConfigLoader().load()  # noqa: F821
+  logger.info(config)
+
   toolkit = Toolkit()
   # toolkit.register_tool_function(execute_python_code)
   # toolkit.register_tool_function(execute_shell_command)
 
-  config = AgentConfigLoader().load()  # noqa: F821
-  logger.info(config)
+  # Register bocha web search tool
+  bocha_tools = BoChaTools(apikey=config.bocha.apikey)
+  toolkit.register_tool_function(bocha_tools.bocha_web_search)
 
   agent = ReActAgent(
     name="zhitou_agent",

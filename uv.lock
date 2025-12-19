@@ -2889,10 +2889,14 @@ version = "0.1.0"
 source = { editable = "packages/zhitou_agent" }
 dependencies = [
     { name = "agentscope" },
+    { name = "requests" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "agentscope", specifier = ">=1.0.9" }]
+requires-dist = [
+    { name = "agentscope", specifier = ">=1.0.9" },
+    { name = "requests", specifier = ">=2.32.5" },
+]
 
 [[package]]
 name = "zipp"
