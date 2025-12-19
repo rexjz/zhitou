@@ -1,3 +1,4 @@
+import datetime
 import os
 import uuid
 import pathlib
@@ -6,9 +7,11 @@ from api.config import APIConfigLoader, APIConfig
 from contextlib import asynccontextmanager
 from core.config.models import LoggingConfig
 from core.db_manager import DatabaseManager
+from core.error.biz_error import BizError, BizErrorCode
 from core.repos.user_repo import UserRepositoryImpl
 from api.services.user import UserServiceImpl
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
 from loguru import logger
 from api.handlers.auth import auth_router
 from api.handlers.user import user_router
@@ -40,9 +43,7 @@ def init_repositories_state() -> RepositoriesState:
 
 
 def init_services_state(repositories: RepositoriesState) -> ServicesState:
-  return ServicesState(
-    user_service=UserServiceImpl(user_repo=repositories.user_repo)
-  )
+  return ServicesState(user_service=UserServiceImpl(user_repo=repositories.user_repo))
 
 
 @asynccontextmanager
@@ -57,16 +58,35 @@ async def lifespan(app: FastAPI):
   repositories = init_repositories_state()
   services = init_services_state(repositories)
   app.state.state = AppState(
-    config=config,
-    db_manager=db_manager,
-    repositories=repositories,
-    services=services
+    config=config, db_manager=db_manager, repositories=repositories, services=services
   )
   yield
   # 清理资源
 
 
 app = FastAPI(lifespan=lifespan)
+
+
+@app.exception_handler(HTTPException)
+async def custom_http_exception_handler(request: Request, exc: HTTPException):
+  return JSONResponse(
+    status_code=exc.status_code,
+    content=APIResponse(
+      code=BizErrorCode.INTERNAL_ERROR,
+      message=exc.detail
+    ),
+  )
+
+
+@app.exception_handler(BizError)
+async def handle_biz_error(request: Request, exc: BizError):
+  return JSONResponse(
+    status_code=exc.http_status,
+    content=APIResponse(
+      code=exc.code,
+      message=exc.message,
+    )
+  )
 
 
 @app.get("/health")

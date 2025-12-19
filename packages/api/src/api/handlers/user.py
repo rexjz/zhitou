@@ -4,7 +4,7 @@ from core.models.user import UserModel
 from api.api_models.api_response import APIResponse
 from pydantic import BaseModel, Field
 
-user_router = APIRouter(dependencies=[Depends(get_current_user)])
+user_router = APIRouter(dependencies=[Depends(get_current_user)], tags=["User"])
 
 class CurrentUserResponseData(BaseModel):
   """Response model for current user information"""

@@ -27,3 +27,6 @@ china_annual_report_soures:
 
 jwt:
   secret_key: ''
+
+dashsope:
+  apikey: ''
