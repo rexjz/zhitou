@@ -15,6 +15,7 @@ dependencies = [
     "psycopg[binary]>=3.2.12",
     "fastapi[standard]>=0.120.4",
     "uvicorn>=0.38.0",
+    "python-jose>=3.5.0",
 ]
 
 [tool.uv.sources]

@@ -24,3 +24,6 @@ ragflow:
 china_annual_report_soures:
   listing_file_path: ''
   base_path: ''
+
+jwt:
+  secret_key: ''

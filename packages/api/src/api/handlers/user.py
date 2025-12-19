@@ -1,27 +1,27 @@
-from fastapi import APIRouter
-from typing import Annotated
+from fastapi import APIRouter, Depends
+from api.middleware import get_current_user
+from core.models.user import UserModel
 from api.api_models.api_response import APIResponse
-from fastapi import Depends
-from api.state import get_app_state_dep, get_request_state_dep, AppState, RequestState
-from core.models.user import CreatePasswordAuthUserDto
-from pydantic import BaseModel
 
-user_router = APIRouter(tags=["User"])
+# Protected router - all routes require authentication
+user_router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
-class SignUpRequest(BaseModel):
-  username: str
-  password: str
+@user_router.get("/me")
+def get_current_user_info(
+  current_user: UserModel = Depends(get_current_user)
+) -> APIResponse:
+  """
+  Get current authenticated user information.
 
-@user_router.post("/signup")
-def signup(
-  data: CreatePasswordAuthUserDto,
-  app_state: Annotated[AppState, Depends(get_app_state_dep)],
-  request_state: Annotated[RequestState, Depends(get_request_state_dep)],
-):
-  app_state.repositories.user_repo.insert_password_auth_user(
-    request_state.db_session, data
+  Returns:
+    User information including id, username, and email
+  """
+  return APIResponse(
+    message="Success",
+    data={
+      "id": str(current_user.id),
+      "username": current_user.username,
+      "email": current_user.email
+    }
   )
-  return APIResponse(message="ok")
-
-

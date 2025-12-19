@@ -11,3 +11,6 @@ server:
 
 ragflow:
   url: 'http://localhost:9278'
+
+jwt:
+  secret_key: '123abc'

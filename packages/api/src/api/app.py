@@ -10,8 +10,8 @@ from core.repos.user_repo import UserRepositoryImpl
 from api.services.user import UserServiceImpl
 from fastapi import FastAPI, Request
 from loguru import logger
+from api.handlers.auth import auth_router
 from api.handlers.user import user_router
-from api.middleware import JWTAuthMiddleware
 
 from typing import cast
 
@@ -79,6 +79,7 @@ def root():
   return "ok"
 
 
+app.include_router(auth_router, prefix="/auth")
 app.include_router(user_router, prefix="/user")
 
 
@@ -91,14 +92,6 @@ async def add_request_state(request: Request, call_next):
   response = await call_next(request)
   response.headers["X-Request-ID"] = request.state.r_state.request_id
   return response
-
-
-# JWT Authentication Middleware
-# Exclude paths that don't require authentication
-jwt_auth_middleware = JWTAuthMiddleware(
-  exclude_paths=["/health", "/", "/user/login", "/user/register"]
-)
-app.middleware("http")(jwt_auth_middleware)
 
 
 @logger.catch()
