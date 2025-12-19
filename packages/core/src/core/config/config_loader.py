@@ -1,14 +1,17 @@
 import os
+from typing import TypeVar, Generic
 from confz import BaseConfig, FileSource, EnvSource
 from dotenv import load_dotenv
 
+T = TypeVar('T', bound=BaseConfig)
 
-class ConfigLoader:
+
+class ConfigLoader(Generic[T]):
   """通用配置加载抽象类。"""
 
   # 子类应重写这两个属性
   prefix: str = ""  # 环境变量前缀
-  config_class: type[BaseConfig] = None  # 对应的配置模型（必须是 BaseConfig 子类）
+  config_class: type[T] = None  # 对应的配置模型（必须是 BaseConfig 子类）
 
   def __init__(self):
     if not self.config_class:
@@ -16,7 +19,7 @@ class ConfigLoader:
     if not issubclass(self.config_class, BaseConfig):
       raise TypeError("config_class must be child of confz.BaseConfig")
 
-  def load(self) -> BaseConfig:
+  def load(self) -> T:
     load_dotenv()
     env = os.getenv("ENV", "dev")
     default_config_file = "config/config.default.yaml"

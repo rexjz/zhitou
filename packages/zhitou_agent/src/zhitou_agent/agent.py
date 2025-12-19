@@ -1,23 +1,26 @@
+import asyncio
 from agentscope.agent import ReActAgent, UserAgent
 from agentscope.model import DashScopeChatModel
 from agentscope.formatter import DashScopeChatFormatter
 from agentscope.memory import InMemoryMemory
 from agentscope.tool import Toolkit
-import os
-import asyncio
+from loguru import logger
+from zhitou_agent.config import AgentConfigLoader
 
-
-async def main():
+async def agent_test():
   toolkit = Toolkit()
   # toolkit.register_tool_function(execute_python_code)
   # toolkit.register_tool_function(execute_shell_command)
 
+  config = AgentConfigLoader().load()  # noqa: F821
+  logger.info(config)
+
   agent = ReActAgent(
-    name="Friday",
+    name="zhitou_agent",
     sys_prompt="You're a helpful assistant named Friday.",
     model=DashScopeChatModel(
       model_name="qwen-max",
-      api_key=os.environ["DASHSCOPE_API_KEY"],
+      api_key=config.dashscpope.apikey,
       stream=True,
     ),
     memory=InMemoryMemory(),
@@ -34,5 +37,5 @@ async def main():
     if msg.get_text_content() == "exit":
       break
 
-
-asyncio.run(main())
+def cli():
+  asyncio.run(agent_test())

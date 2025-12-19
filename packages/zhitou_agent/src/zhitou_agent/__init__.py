@@ -1,7 +1,5 @@
 import agentscope
 
-
-
 def main():
   print(f'agentscope: {agentscope.__version__}')
 
