@@ -3,10 +3,11 @@ from agentscope.agent import ReActAgent, UserAgent
 from agentscope.model import DashScopeChatModel
 from agentscope.formatter import DashScopeChatFormatter
 from agentscope.memory import InMemoryMemory
-from agentscope.tool import Toolkit, execute_python_code
+from agentscope.tool import Toolkit, view_text_file
 from loguru import logger
 from zhitou_agent.config import AgentConfigLoader
 from zhitou_agent.tools.bocha_web_search import BoChaTools
+
 
 async def agent_test():
   config = AgentConfigLoader().load()  # noqa: F821
@@ -19,6 +20,7 @@ async def agent_test():
   # Register bocha web search tool
   bocha_tools = BoChaTools(apikey=config.bocha.apikey)
   toolkit.register_tool_function(bocha_tools.bocha_web_search)
+  toolkit.register_tool_function(view_text_file)
 
   agent = ReActAgent(
     name="zhitou_agent",
@@ -41,6 +43,7 @@ async def agent_test():
     msg = await user(msg)
     if msg.get_text_content() == "exit":
       break
+
 
 def cli():
   asyncio.run(agent_test())

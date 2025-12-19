@@ -1,5 +1,6 @@
 """Bocha web search tool for agentscope."""
 
+import json
 import httpx
 from agentscope.message import TextBlock
 from agentscope.tool import ToolResponse
@@ -15,7 +16,7 @@ class BoChaTools:
     query: str,
     count: int = 10,
   ) -> ToolResponse:
-    """Search the web using Bocha API and return results.
+    """Search the web using Bocha API and return results. You shuold call this tool why you are not 100% sure about facts
 
     Args:
       query (`str`):
@@ -62,50 +63,45 @@ class BoChaTools:
 
         data = result.get("data", {})
 
-        # Format the response as text
-        result_text = f"Search results for: {query}\n\n"
-
-        # Add total estimated matches
+        # Format the response as JSON
         web_pages = data.get("webPages", {})
-        total_matches = web_pages.get("totalEstimatedMatches", 0)
-        result_text += f"Total estimated matches: {total_matches:,}\n\n"
-
-        # Add web search results
         web_results = web_pages.get("value", [])
-        if web_results:
-          result_text += "Web Results:\n"
-          for idx, item in enumerate(web_results, 1):
-            name = item.get("name", "N/A")
-            url_link = item.get("url", "N/A")
-            snippet = item.get("snippet", "N/A")
-            site_name = item.get("siteName", "")
-            date_crawled = item.get("dateLastCrawled", "")
 
-            result_text += f"{idx}. {name}\n"
-            result_text += f"   URL: {url_link}\n"
-            if site_name:
-              result_text += f"   Site: {site_name}\n"
-            result_text += f"   {snippet}\n"
-            if date_crawled:
-              result_text += f"   Last crawled: {date_crawled}\n"
-            result_text += "\n"
-        else:
-          result_text += "No web results found.\n\n"
+        # Structure web results
+        formatted_web_results = []
+        for item in web_results:
+          formatted_web_results.append({
+            "name": item.get("name", "N/A"),
+            "url": item.get("url", "N/A"),
+            "snippet": item.get("snippet", "N/A"),
+            "siteName": item.get("siteName", ""),
+            "dateLastCrawled": item.get("dateLastCrawled", "")
+          })
 
-        # Add image results if present
+        # Structure image results
         images = data.get("images", {})
         image_results = images.get("value", [])
-        if image_results:
-          result_text += f"\nImages found: {len(image_results)} images\n"
-          for idx, img in enumerate(image_results[:5], 1):  # Show first 5 images
-            img_url = img.get("contentUrl", "N/A")
-            result_text += f"  {idx}. {img_url}\n"
+        formatted_image_results = []
+        for img in image_results:
+          formatted_image_results.append({
+            "contentUrl": img.get("contentUrl", "N/A"),
+            "thumbnailUrl": img.get("thumbnailUrl", ""),
+            "name": img.get("name", "")
+          })
+
+        # Create JSON response
+        json_result = {
+          "query": query,
+          "totalEstimatedMatches": web_pages.get("totalEstimatedMatches", 0),
+          "webResults": formatted_web_results,
+          "imageResults": formatted_image_results
+        }
 
         return ToolResponse(
           content=[
             TextBlock(
               type="text",
-              text=result_text,
+              text=json.dumps(json_result, ensure_ascii=False, indent=2),
             ),
           ],
         )
