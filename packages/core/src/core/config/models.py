@@ -38,3 +38,6 @@ class JWTConfig(BaseModel):
 
 class DashsopeConfig(BaseModel):
   apikey: str
+
+class BochaConfig(BaseModel):
+  apikey: str

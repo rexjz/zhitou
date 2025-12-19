@@ -30,3 +30,6 @@ jwt:
 
 dashscpope:
   apikey: ''
+
+bocha:
+  apikey: ''
