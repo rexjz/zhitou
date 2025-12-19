@@ -15,6 +15,7 @@ from fastapi.responses import JSONResponse
 from loguru import logger
 from api.handlers.auth import auth_router
 from api.handlers.user import user_router
+from api.handlers.system import system_router
 
 from typing import cast
 
@@ -71,10 +72,7 @@ app = FastAPI(lifespan=lifespan)
 async def custom_http_exception_handler(request: Request, exc: HTTPException):
   return JSONResponse(
     status_code=exc.status_code,
-    content=APIResponse(
-      code=BizErrorCode.INTERNAL_ERROR,
-      message=exc.detail
-    ),
+    content=APIResponse(code=BizErrorCode.INTERNAL_ERROR, message=exc.detail),
   )
 
 
@@ -85,20 +83,11 @@ async def handle_biz_error(request: Request, exc: BizError):
     content=APIResponse(
       code=exc.code,
       message=exc.message,
-    )
+    ),
   )
 
 
-@app.get("/health")
-def health():
-  return APIResponse(message="ok")
-
-
-@app.get("/")
-def root():
-  return "ok"
-
-
+app.include_router(system_router)
 app.include_router(auth_router, prefix="/auth")
 app.include_router(user_router, prefix="/user")
 
