@@ -1,5 +1,5 @@
 [project]
-name = "zhitou-agent"
+name = "zhitou_agent"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -7,3 +7,10 @@ requires-python = ">=3.12"
 dependencies = [
     "agentscope>=1.0.9",
 ]
+
+[project.scripts]
+zhitou_agent = "zhitou_agent:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

@@ -2886,7 +2886,7 @@ dev = [
 [[package]]
 name = "zhitou-agent"
 version = "0.1.0"
-source = { virtual = "packages/zhitou_agent" }
+source = { editable = "packages/zhitou_agent" }
 dependencies = [
     { name = "agentscope" },
 ]
