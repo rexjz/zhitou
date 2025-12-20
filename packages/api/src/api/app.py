@@ -1,5 +1,5 @@
-import datetime
 import os
+import sys
 import uuid
 import pathlib
 from api.api_models.api_response import APIResponse
@@ -36,6 +36,14 @@ def _config_logger(config: LoggingConfig):
     rotation=config.rotation,
     backtrace=True,
     format="{time} | {level} | {name}:{function}:{line} - {message}",
+  )
+  logger.add(
+    sys.stdout,
+    serialize=True
+  )
+  logger.add(
+    sys.stderr,
+    serialize=True
   )
 
 

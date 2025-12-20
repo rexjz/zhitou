@@ -4,7 +4,7 @@ import json
 import httpx
 from agentscope.message import TextBlock
 from agentscope.tool import ToolResponse
-
+from loguru import logger
 
 class BoChaTools:
   def __init__(self, apikey: str):
@@ -16,7 +16,7 @@ class BoChaTools:
     query: str,
     count: int = 10,
   ) -> ToolResponse:
-    """Search the web using Bocha API and return results. You shuold call this tool why you are not 100% sure about facts
+    """Search the web using Bocha API and return results. You shuold always call this tool why you are not 100% sure about facts
 
     Args:
       query (`str`):
@@ -48,6 +48,7 @@ class BoChaTools:
         )
         response.raise_for_status()
         result = response.json()
+        print(response)
 
         # Check API response code
         if result.get("code") != 200:
@@ -64,8 +65,8 @@ class BoChaTools:
         data = result.get("data", {})
 
         # Format the response as JSON
-        web_pages = data.get("webPages", {})
-        web_results = web_pages.get("value", [])
+        web_pages = data.get("webPages")
+        web_results = web_pages.get("value", []) if web_pages else []
 
         # Structure web results
         formatted_web_results = []
@@ -79,8 +80,8 @@ class BoChaTools:
           })
 
         # Structure image results
-        images = data.get("images", {})
-        image_results = images.get("value", [])
+        images = data.get("images")
+        image_results = images.get("value", []) if images else []
         formatted_image_results = []
         for img in image_results:
           formatted_image_results.append({
@@ -92,7 +93,7 @@ class BoChaTools:
         # Create JSON response
         json_result = {
           "query": query,
-          "totalEstimatedMatches": web_pages.get("totalEstimatedMatches", 0),
+          "totalEstimatedMatches": web_pages.get("totalEstimatedMatches", 0) if web_pages else 0,
           "webResults": formatted_web_results,
           "imageResults": formatted_image_results
         }
@@ -107,6 +108,7 @@ class BoChaTools:
         )
 
     except httpx.HTTPStatusError as e:
+      logger.exception("")
       error_msg = f"HTTP error occurred: {e.response.status_code} - {e.response.text}"
       return ToolResponse(
         content=[
@@ -117,6 +119,7 @@ class BoChaTools:
         ],
       )
     except httpx.RequestError as e:
+      logger.exception("")
       error_msg = f"Request error occurred: {str(e)}"
       return ToolResponse(
         content=[
@@ -127,6 +130,7 @@ class BoChaTools:
         ],
       )
     except Exception as e:
+      logger.exception("")
       error_msg = f"Unexpected error occurred: {str(e)}"
       return ToolResponse(
         content=[
