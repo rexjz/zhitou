@@ -16,6 +16,7 @@ dependencies = [
     "fastapi[standard]>=0.120.4",
     "uvicorn>=0.38.0",
     "python-jose>=3.5.0",
+    "ag-ui-protocol>=0.1.10",
 ]
 
 [tool.uv.sources]

@@ -1,4 +1,5 @@
 import asyncio
+import json
 from agentscope.agent import ReActAgent, UserAgent
 from agentscope.model import DashScopeChatModel
 from agentscope.formatter import DashScopeChatFormatter
@@ -42,7 +43,7 @@ async def agent_test():
   msg = None
   while True:
     msg = await agent(msg)
-    logger.info(msg)
+    print(json.dumps(agent.memory.state_dict(), indent=2, ensure_ascii=False))
     msg = await user(msg)
     if msg.get_text_content() == "exit":
       break
@@ -50,3 +51,4 @@ async def agent_test():
 
 def cli():
   asyncio.run(agent_test())
+

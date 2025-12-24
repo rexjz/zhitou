@@ -33,3 +33,6 @@ dashscpope:
 
 bocha:
   apikey: ''
+
+agent:
+  memory_base_dir: ''
