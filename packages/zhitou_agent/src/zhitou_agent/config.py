@@ -8,13 +8,13 @@ from core.config.models import LoggingConfig
 from loguru import logger
 
 
-class AgentConfig(BaseConfig):
+class ZhitouAgentConfig(BaseConfig):
   dashscpope: DashsopeConfig
   bocha: BochaConfig
   logging: LoggingConfig
 
-class AgentConfigLoader(ConfigLoader[AgentConfig]):
-  config_class = AgentConfig
+class ZhitouAgentConfigLoader(ConfigLoader[ZhitouAgentConfig]):
+  config_class = ZhitouAgentConfig
   prefix = "agent"
 
 

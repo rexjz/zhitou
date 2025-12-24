@@ -6,13 +6,13 @@ from agentscope.formatter import DashScopeChatFormatter
 from agentscope.memory import InMemoryMemory
 from agentscope.tool import Toolkit, view_text_file
 from loguru import logger
-from zhitou_agent.config import AgentConfigLoader, config_logger
+from zhitou_agent.config import ZhitouAgentConfigLoader, config_logger
 from zhitou_agent.tools.bocha_web_search import BoChaTools
 from zhitou_agent.prompt.system import system_prompt
 
 async def agent_test():
   
-  config = AgentConfigLoader().load()  
+  config = ZhitouAgentConfigLoader().load()  
   logger.info(config)
   config_logger(config.logging)
 
