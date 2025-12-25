@@ -10,14 +10,23 @@ from pydantic import BaseModel
 auth_router = APIRouter(tags=["Auth"])
 
 
+class SignUpRequest(BaseModel):
+  username: str
+  password: str
+
 @auth_router.post("/signup")
 def signup(
-  data: CreatePasswordAuthUserDto,
+  data: SignUpRequest,
   app_state: Annotated[AppState, Depends(get_app_state_dep)],
   request_state: Annotated[RequestState, Depends(get_request_state_dep)],
 ):
+  create_user_dto = CreatePasswordAuthUserDto(
+    username=data.username,
+    password=data.password
+  )
+
   app_state.repositories.user_repo.insert_password_auth_user(
-    request_state.db_session, data
+    request_state.db_session, create_user_dto
   )
   return APIResponse(message="ok")
 

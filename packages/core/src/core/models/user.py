@@ -24,8 +24,7 @@ class UserModel(BaseModel):
 class CreatePasswordAuthUserDto(BaseModel):
   username: str
   email: Optional[str] = None
-  hashed_password: str
-  salt: str
+  password: str
 
 
 class UpdateUserDto(BaseModel):

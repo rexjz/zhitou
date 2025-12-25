@@ -5,6 +5,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import NoResultFound
 from uuid import UUID
 from typing import Protocol, Optional
+import hashlib
+import secrets
 
 
 class UserRepository(Protocol):
@@ -44,6 +46,13 @@ class UserRepositoryImpl:
   def insert_password_auth_user(
     self, session: Session, dto: CreatePasswordAuthUserDto
   ) -> UserModel:
+    # Generate salt
+    salt = secrets.token_hex(32)
+
+    # Hash password with salt
+    password_with_salt = f"{dto.password}{salt}"
+    hashed_password = hashlib.sha256(password_with_salt.encode()).hexdigest()
+
     savepoint = session.begin_nested()
     try:
       user_orm = UserOrmModel(username=dto.username, email=dto.email)
@@ -51,7 +60,7 @@ class UserRepositoryImpl:
       session.flush()
 
       password_orm = UserPasswordOrmModel(
-        user_id=user_orm.id, hashed_password=dto.hashed_password, salt=dto.salt
+        user_id=user_orm.id, hashed_password=hashed_password, salt=salt
       )
       session.add(password_orm)
       session.flush()
