@@ -246,6 +246,7 @@ version = "0.1.0"
 source = { editable = "packages/api" }
 dependencies = [
     { name = "ag-ui-protocol" },
+    { name = "agentscope" },
     { name = "confz" },
     { name = "core" },
     { name = "fastapi", extra = ["standard"] },
@@ -259,6 +260,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "ag-ui-protocol", specifier = ">=0.1.10" },
+    { name = "agentscope", specifier = ">=1.0.9" },
     { name = "confz", specifier = ">=2.1.0" },
     { name = "core", editable = "packages/core" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.120.4" },

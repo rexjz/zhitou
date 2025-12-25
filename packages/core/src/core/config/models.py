@@ -42,6 +42,7 @@ class JWTConfig(BaseModel):
   algorithm: str = Field(default="HS256")
   access_token_expire_minutes: int = Field(default=30)
   cookie_name: str = Field(default="zhitou_access_token")
+  cookie_secure: bool = Field(default=True)
 
 
 class DashsopeConfig(BaseModel):

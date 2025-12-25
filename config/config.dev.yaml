@@ -15,3 +15,4 @@ ragflow:
 jwt:
   secret_key: '123abc'
   cookie_name: 'zhitou-access-token'
+  cookie_secure: false

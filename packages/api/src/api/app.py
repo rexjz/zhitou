@@ -5,6 +5,8 @@ import pathlib
 from api.api_models.api_response import APIResponse
 from api.config import APIConfigLoader, APIConfig
 from contextlib import asynccontextmanager
+from api.services.agent.agent_memory_service import AgentMemoryService
+from api.services.agent.agent_memory_service_fs_impl import AgentMemoryServiceFSImpl
 from core.config.models import LoggingConfig
 from core.db_manager import DatabaseManager
 from core.error.biz_error import BizError, BizErrorCode
@@ -21,6 +23,7 @@ from typing import cast
 
 import uvicorn
 from .state import (
+  AgentService,
   RepositoriesState,
   ServicesState,
   RequestState,
@@ -37,22 +40,12 @@ def _config_logger(config: LoggingConfig):
     backtrace=True,
     format="{time} | {level} | {name}:{function}:{line} - {message}",
   )
-  logger.add(
-    sys.stdout,
-    serialize=True
-  )
-  logger.add(
-    sys.stderr,
-    serialize=True
-  )
+  logger.add(sys.stdout, serialize=True)
+  logger.add(sys.stderr, serialize=True)
 
 
 def init_repositories_state() -> RepositoriesState:
   return RepositoriesState(user_repo=UserRepositoryImpl())
-
-
-def init_services_state(repositories: RepositoriesState) -> ServicesState:
-  return ServicesState(user_service=UserServiceImpl(user_repo=repositories.user_repo))
 
 
 @asynccontextmanager
@@ -65,7 +58,12 @@ async def lifespan(app: FastAPI):
   db_manager = DatabaseManager()
   db_manager.init(config.database.url)
   repositories = init_repositories_state()
-  services = init_services_state(repositories)
+  services = ServicesState(
+    user_service=UserServiceImpl(user_repo=repositories.user_repo),
+    agent_service=AgentService(
+      memory=AgentMemoryServiceFSImpl(base_dir=config.agent.memory_base_dir)
+    )
+  )
   app.state.state = AppState(
     config=config, db_manager=db_manager, repositories=repositories, services=services
   )

@@ -27,6 +27,7 @@ china_annual_report_soures:
 
 jwt:
   secret_key: ''
+  cookie_secure: true
 
 dashscpope:
   apikey: ''

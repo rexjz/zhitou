@@ -20,6 +20,7 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 app = FastAPI(title="AG-UI Chat SSE Server")
 
 
+
 @app.post("/agui-chat")
 async def agui_chat(request: Request):
   """

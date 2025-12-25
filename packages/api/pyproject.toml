@@ -17,6 +17,7 @@ dependencies = [
     "uvicorn>=0.38.0",
     "python-jose>=3.5.0",
     "ag-ui-protocol>=0.1.10",
+    "agentscope>=1.0.9",
 ]
 
 [tool.uv.sources]

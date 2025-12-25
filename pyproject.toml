@@ -26,7 +26,7 @@ members = [
 [project.scripts]
 api-start = "api:main"
 # agent = "zhitou_agent:main"
-agent-cli = "zhitou_agent.agent:cli"
+agent-cli = "zhitou_agent.cli:cli"
 # worker-start = "api:main"
 
 [build-system]

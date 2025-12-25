@@ -1,10 +1,52 @@
 from typing import Optional
+from core.config.models import JWTConfig
 from fastapi import Request, HTTPException, status, Depends
 from jose import JWTError, jwt
 from uuid import UUID
+from datetime import datetime, timedelta, timezone
 from api.state import get_app_state_dep, RequestState
 from core.models.user import UserModel
 from loguru import logger
+
+
+def generate_token(
+  jwt_config: JWTConfig,
+  user: UserModel,
+  expires_delta: Optional[timedelta] = None
+) -> str:
+  """
+  Generate a JWT token for a user.
+
+  Args:
+    request: FastAPI request object to access app state
+    user: UserModel to generate token for
+    expires_delta: Optional expiration time delta (defaults to 7 days)
+
+  Returns:
+    JWT token string
+  """
+  # Set expiration time
+  if expires_delta is None:
+    expires_delta = timedelta(hours=2)
+
+  now = datetime.now(timezone.utc)
+  expire = now + expires_delta
+
+  # Create token payload with Unix epoch timestamps
+  payload = {
+    "sub": str(user.id),
+    "exp": int(expire.timestamp()),
+    "iat": int(now.timestamp())
+  }
+
+  # Encode token
+  token = jwt.encode(
+    payload,
+    jwt_config.secret_key,
+    algorithm=jwt_config.algorithm
+  )
+
+  return token
 
 
 async def get_token_from_cookie(request: Request) -> Optional[str]:
