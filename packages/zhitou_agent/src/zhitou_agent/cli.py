@@ -1,14 +1,15 @@
-import asyncio
-from agentscope.agent import ReActAgent, UserAgent
-from agentscope.model import DashScopeChatModel
 from zhitou_agent.tools.browser_use_website_access import WebsiteAccessTool
 from zhitou_agent.config import ZhitouAgentConfigLoader, config_logger
 from zhitou_agent.tools.bocha_web_search import BoChaTools
 from zhitou_agent.tools.time_tools import get_current_time
 from agentscope.formatter import DashScopeChatFormatter
 from agentscope.tool import Toolkit, view_text_file
+from agentscope.agent import ReActAgent, UserAgent
+from agentscope.model import DashScopeChatModel
+from agentscope.plan import PlanNotebook
 from agentscope.memory import InMemoryMemory
 from loguru import logger
+import asyncio
 
 def post_reply_hook_function(*args):
   print("post_reply_hook_function: ", args, "\n")
