@@ -1,7 +1,7 @@
 from sqlalchemy import Engine, create_engine, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import Session
-
+from loguru import logger
 
 def _check_db(engine: Engine, retries=5, interval=1.0):
   last_err = None
@@ -24,9 +24,11 @@ class DatabaseManager:
     self.SessionLocal = None
 
   def init(self, uri: str):
+
     self.engine = create_engine(
       uri, pool_pre_ping=True, pool_size=5, max_overflow=10, pool_timeout=5
     )
+    logger.info(f"DatabaseManager, uri: {uri}")
     _check_db(self.engine)
     self.SessionLocal = sessionmaker(bind=self.engine)
 

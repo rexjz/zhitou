@@ -44,4 +44,4 @@ def get_app_state_dep(request: Request) -> AppState:
   return cast(AppState, request.app.state.state)
 
 def get_request_state_dep(request: Request) -> AppState:
-  return cast(RequestState, request.state.state)
+  return cast(RequestState, request.state.r_state)

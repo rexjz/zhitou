@@ -39,9 +39,10 @@ def _config_logger(config: LoggingConfig):
     rotation=config.rotation,
     backtrace=True,
     format="{time} | {level} | {name}:{function}:{line} - {message}",
+    serialize=True
   )
-  logger.add(sys.stdout, serialize=True)
-  logger.add(sys.stderr, serialize=True)
+  # logger.add(sys.stdout, serialize=True)
+  # logger.add(sys.stderr, serialize=True)
 
 
 def init_repositories_state() -> RepositoriesState:
@@ -57,6 +58,7 @@ async def lifespan(app: FastAPI):
   logger.debug(f"config loaded:\n {json.dumps(config.model_dump(), indent=2)}")
   db_manager = DatabaseManager()
   db_manager.init(config.database.url)
+  
   repositories = init_repositories_state()
   services = ServicesState(
     user_service=UserServiceImpl(user_repo=repositories.user_repo),

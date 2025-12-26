@@ -42,6 +42,6 @@ uv run --package database_migration alembic -c packages/database_migration/src/d
 # migration version自动生成
 uv run --package database_migration alembic -c packages/database_migration/src/database_migration/alembic.ini revision --autogenerate -m "<describe the change>"
 
-# apply最新version自动生成
+# apply最新version
 uv run --package database_migration alembic -c packages/database_migration/src/database_migration/alembic.ini upgrade head
 ```
