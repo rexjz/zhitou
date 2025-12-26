@@ -1,0 +1,13 @@
+database:
+  url: postgresql+psycopg://postgres:postgres@127.0.0.1:5432/postgres
+  port: 5432
+
+redis:
+  url: 'redis'
+  port: 6379
+
+server:
+  reload: true
+
+ragflow:
+  url: 'http://localhost:9278'

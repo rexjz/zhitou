@@ -1,0 +1,21 @@
+[project]
+name = "worker"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "xujingzhou", email = "max3.xu@outlook.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "ragflow-sdk>=0.22.1",
+    "tqdm>=4.67.1",
+]
+
+[project.scripts]
+worker = "worker:main"
+annual_report_worker = "worker.annual_report_worker:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

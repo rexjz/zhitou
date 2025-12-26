@@ -1,0 +1,26 @@
+[project]
+name = "core"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "xujingzhou", email = "max3.xu@outlook.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "database",
+    "confz>=2.1.0",
+    "python-dotenv>=1.2.1",
+    "ragflow-sdk>=0.22.1",
+    "requests>=2.32.5",
+]
+
+[tool.uv.sources]
+database = { workspace = true }
+
+[project.scripts]
+core = "core:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

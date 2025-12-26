@@ -1,0 +1,32 @@
+[project]
+name = "zhitou"
+version = "0.1.0"
+description = "zhitou monorepo codebase"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
+
+# [tool.uv.sources]
+# api = { workspace = true }
+# worker = { workspace = true }
+
+[dependency-groups]
+dev = ["ruff >= 0.8.1", "pytest >= 8.3.4"]
+
+[tool.uv.workspace]
+members = [
+  "packages/api",
+  "packages/core",
+  "packages/database",
+  "packages/worker",
+  "packages/database_migration",
+  "packages/zhitou_agent",
+]
+
+[project.scripts]
+api-start = "api:main"
+# worker-start = "api:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

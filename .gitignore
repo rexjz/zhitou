@@ -1,0 +1,15 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.env
+.ruff_cache
+# Virtual environments
+.venv
+.logs
+docker/ragflow/ragflow-logs
+docker/history_data_agent
+ragflow_python_api_reference.md

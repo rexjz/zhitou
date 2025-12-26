@@ -1,0 +1,26 @@
+server:
+  host: '0.0.0.0'
+  port: 6008
+  reload: false
+  
+logging:
+  log_file_dir: .logs/
+  rotation: "00:00"
+  log_format: "{time} | {level} | {name}:{function}:{line} - {message}"
+
+redis:
+  url: 'zt_redis'
+  port: 6379
+
+database:
+  url: postgresql+psycopg://postgres:postgres@127.0.0.1:5432/postgres
+  port: 5432
+
+ragflow:
+  url: 'http://ragflow:9278'
+  apikey: ''
+  kb_name: 'zhitou_kb'
+
+china_annual_report_soures:
+  listing_file_path: ''
+  base_path: ''
