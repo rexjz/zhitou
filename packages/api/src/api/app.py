@@ -5,7 +5,6 @@ import pathlib
 from api.api_models.api_response import APIResponse
 from api.config import APIConfigLoader, APIConfig
 from contextlib import asynccontextmanager
-from api.services.agent.agent_memory_service import AgentMemoryService
 from api.services.agent.agent_memory_service_fs_impl import AgentMemoryServiceFSImpl
 from core.config.models import LoggingConfig
 from core.db_manager import DatabaseManager
@@ -58,7 +57,7 @@ async def lifespan(app: FastAPI):
   logger.debug(f"config loaded:\n {json.dumps(config.model_dump(), indent=2)}")
   db_manager = DatabaseManager()
   db_manager.init(config.database.url)
-  
+
   repositories = init_repositories_state()
   services = ServicesState(
     user_service=UserServiceImpl(user_repo=repositories.user_repo),

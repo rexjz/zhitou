@@ -31,6 +31,7 @@ jwt:
 
 dashscpope:
   apikey: ''
+  openai_compatible_base_url: 'https://dashscope.aliyuncs.com/compatible-mode/v1'
 
 bocha:
   apikey: ''

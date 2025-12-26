@@ -47,6 +47,7 @@ class JWTConfig(BaseModel):
 
 class DashsopeConfig(BaseModel):
   apikey: str
+  openai_compatible_base_url: str
 
 
 class BochaConfig(BaseModel):

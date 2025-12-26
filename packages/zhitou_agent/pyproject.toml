@@ -6,6 +6,8 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "agentscope>=1.0.9",
+    "browser-use>=0.11.2",
+    "playwright>=1.57.0",
     "requests>=2.32.5",
 ]
 
