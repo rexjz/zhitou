@@ -12,7 +12,7 @@ python.uv_venv_auto = true
 [tasks.setup]
 run = [
   "pnpm install",
-  "uv sync",         # 安装 uv workspace 依赖
+  "uv sync --all-packages",         # 安装 uv workspace 依赖
 ]
 
 [tasks.dev-web]
