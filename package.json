@@ -1,0 +1,10 @@
+{
+  "name": "zhitou",
+  "private": true,
+  "scripts": {},
+  "devDependencies": {},
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=10.24.0"
+  }
+}
