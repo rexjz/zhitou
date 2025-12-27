@@ -1,0 +1,22 @@
+min_version = "2024.9.5"
+
+[tools]
+node = "20"
+pnpm = "10"
+# python = "3.12" python version in project venv is totally managed by uv
+uv = "0.9.18"
+
+[settings]
+python.uv_venv_auto = true
+
+[tasks.setup]
+run = [
+  "pnpm install",
+  "uv sync",         # 安装 uv workspace 依赖
+]
+
+[tasks.dev-web]
+run = "pnpm --filter web dev"
+
+[tasks.dev-api]
+run = "uv run api-dev"

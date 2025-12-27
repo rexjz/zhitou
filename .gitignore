@@ -13,3 +13,5 @@ wheels/
 docker/ragflow/ragflow-logs
 docker/history_data_agent
 ragflow_python_api_reference.md
+
+node_modules

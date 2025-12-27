@@ -24,9 +24,25 @@ python 文件使用 ruff 作为 formatter，formatter 配置在 ruff.toml 中。
 
 ### 启动服务
 
+#### 激活mise环境
+```
+eval "$(mise activate bash)"
+```
+
+安装依赖
+```
+mise setup
+```
+
 #### api
 ```
 uv run --package api api
+```
+
+#### web
+
+```
+mise dev-web
 ```
 
 #### worker
