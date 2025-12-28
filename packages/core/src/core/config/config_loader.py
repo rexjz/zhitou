@@ -2,7 +2,7 @@ import os
 from typing import TypeVar, Generic
 from confz import BaseConfig, FileSource, EnvSource
 from dotenv import load_dotenv
-
+import pathlib
 T = TypeVar('T', bound=BaseConfig)
 
 
@@ -21,9 +21,10 @@ class ConfigLoader(Generic[T]):
 
   def load(self) -> T:
     load_dotenv()
+    base_path = pathlib.Path(__file__).parent.joinpath("..", "..", "..", "..", "..")
     env = os.getenv("ENV", "dev")
-    default_config_file = "config/config.default.yaml"
-    env_specific_config_file = f"config/config.{env}.yaml"
+    default_config_file =  base_path / "config/config.default.yaml"
+    env_specific_config_file = base_path / f"config/config.{env}.yaml"
     
     print(f"🔧 Loading {self.config_class.__name__} in environment: {env}")
 
