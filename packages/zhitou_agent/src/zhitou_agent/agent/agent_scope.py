@@ -72,3 +72,4 @@ async def agentscope_agent_cli():
     msg = await user(msg)
     if msg.get_text_content() == "exit":
       break
+
