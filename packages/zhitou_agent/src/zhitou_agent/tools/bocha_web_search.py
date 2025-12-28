@@ -6,12 +6,16 @@ from agentscope.message import TextBlock
 from agentscope.tool import ToolResponse
 from loguru import logger
 
+
 class BoChaTools:
   def __init__(self, apikey: str):
     self.apikey = apikey
     self.base_url = "https://api.bocha.cn/v1"
 
-  async def bocha_web_search(
+  async def bocha_web_search(self, *args, **kwargs):
+    return self.web_search(*args, **kwargs)
+
+  async def web_search(
     self,
     query: str,
     count: int = 10,
@@ -48,7 +52,6 @@ class BoChaTools:
         )
         response.raise_for_status()
         result = response.json()
-        print(response)
 
         # Check API response code
         if result.get("code") != 200:
@@ -71,41 +74,40 @@ class BoChaTools:
         # Structure web results
         formatted_web_results = []
         for item in web_results:
-          formatted_web_results.append({
-            "name": item.get("name", "N/A"),
-            "url": item.get("url", "N/A"),
-            "snippet": item.get("snippet", "N/A"),
-            "siteName": item.get("siteName", ""),
-            "dateLastCrawled": item.get("dateLastCrawled", "")
-          })
+          formatted_web_results.append(
+            {
+              "name": item.get("name", "N/A"),
+              "url": item.get("url", "N/A"),
+              "snippet": item.get("snippet", "N/A"),
+              "siteName": item.get("siteName", ""),
+              "dateLastCrawled": item.get("dateLastCrawled", ""),
+            }
+          )
 
         # Structure image results
         images = data.get("images")
         image_results = images.get("value", []) if images else []
         formatted_image_results = []
         for img in image_results:
-          formatted_image_results.append({
-            "contentUrl": img.get("contentUrl", "N/A"),
-            "thumbnailUrl": img.get("thumbnailUrl", ""),
-            "name": img.get("name", "")
-          })
+          formatted_image_results.append(
+            {
+              "contentUrl": img.get("contentUrl", "N/A"),
+              "thumbnailUrl": img.get("thumbnailUrl", ""),
+              "name": img.get("name", ""),
+            }
+          )
 
         # Create JSON response
         json_result = {
           "query": query,
-          "totalEstimatedMatches": web_pages.get("totalEstimatedMatches", 0) if web_pages else 0,
+          "totalEstimatedMatches": web_pages.get("totalEstimatedMatches", 0)
+          if web_pages
+          else 0,
           "webResults": formatted_web_results,
-          "imageResults": formatted_image_results
+          "imageResults": formatted_image_results,
         }
 
-        return ToolResponse(
-          content=[
-            TextBlock(
-              type="text",
-              text=json.dumps(json_result, ensure_ascii=False, indent=2),
-            ),
-          ],
-        )
+        return json_result
 
     except httpx.HTTPStatusError as e:
       logger.exception("")

@@ -18,5 +18,8 @@ run = [
 [tasks.dev-web]
 run = "pnpm --filter web dev"
 
+[tasks.agent-cli]
+run = "uv run --package zhitou_agent zhitou-agent-cli"
+
 [tasks.dev-api]
 run = "uv run api-dev"
