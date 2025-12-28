@@ -11,7 +11,7 @@ from core.db_manager import DatabaseManager
 from core.error.biz_error import BizError, BizErrorCode
 from core.repos.user_repo import UserRepositoryImpl
 from api.services.user import UserServiceImpl
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from loguru import logger
 from api.handlers.auth import auth_router
@@ -21,6 +21,7 @@ from api.handlers.system import system_router
 from typing import cast
 
 import uvicorn
+from zhitou_agent.ag_ui import agui_app
 from .state import (
   AgentService,
   RepositoriesState,
@@ -38,7 +39,7 @@ def _config_logger(config: LoggingConfig):
     rotation=config.rotation,
     backtrace=True,
     format="{time} | {level} | {name}:{function}:{line} - {message}",
-    serialize=True
+    serialize=True,
   )
   # logger.add(sys.stdout, serialize=True)
   # logger.add(sys.stderr, serialize=True)
@@ -63,7 +64,7 @@ async def lifespan(app: FastAPI):
     user_service=UserServiceImpl(user_repo=repositories.user_repo),
     agent_service=AgentService(
       memory=AgentMemoryServiceFSImpl(base_dir=config.agent.memory_base_dir)
-    )
+    ),
   )
   app.state.state = AppState(
     config=config, db_manager=db_manager, repositories=repositories, services=services
@@ -97,6 +98,7 @@ async def handle_biz_error(request: Request, exc: BizError):
 app.include_router(system_router)
 app.include_router(auth_router, prefix="/auth")
 app.include_router(user_router, prefix="/user")
+app.include_router(, prefix="/agent")
 
 
 @app.middleware("http")
