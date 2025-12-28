@@ -263,6 +263,7 @@ dependencies = [
     { name = "python-jose" },
     { name = "sqlalchemy" },
     { name = "uvicorn" },
+    { name = "zhitou-agent" },
 ]
 
 [package.metadata]
@@ -277,6 +278,7 @@ requires-dist = [
     { name = "python-jose", specifier = ">=3.5.0" },
     { name = "sqlalchemy", specifier = ">=2.0.44" },
     { name = "uvicorn", specifier = ">=0.33.0" },
+    { name = "zhitou-agent", editable = "packages/zhitou_agent" },
 ]
 
 [[package]]

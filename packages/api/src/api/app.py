@@ -11,17 +11,18 @@ from core.db_manager import DatabaseManager
 from core.error.biz_error import BizError, BizErrorCode
 from core.repos.user_repo import UserRepositoryImpl
 from api.services.user import UserServiceImpl
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from loguru import logger
 from api.handlers.auth import auth_router
 from api.handlers.user import user_router
 from api.handlers.system import system_router
+from api.handlers.agent import agent_app
 
 from typing import cast
 
 import uvicorn
-from zhitou_agent.ag_ui import agui_app
+
 from .state import (
   AgentService,
   RepositoriesState,
@@ -80,7 +81,9 @@ app = FastAPI(lifespan=lifespan)
 async def custom_http_exception_handler(request: Request, exc: HTTPException):
   return JSONResponse(
     status_code=exc.status_code,
-    content=APIResponse(code=BizErrorCode.INTERNAL_ERROR, message=exc.detail),
+    content=APIResponse(
+      code=BizErrorCode.INTERNAL_ERROR, message=exc.detail
+    ).model_dump(),
   )
 
 
@@ -91,14 +94,14 @@ async def handle_biz_error(request: Request, exc: BizError):
     content=APIResponse(
       code=exc.code,
       message=exc.message,
-    ),
+    ).model_dump(),
   )
 
 
 app.include_router(system_router)
 app.include_router(auth_router, prefix="/auth")
 app.include_router(user_router, prefix="/user")
-app.include_router(, prefix="/agent")
+app.include_router(agent_app, prefix="/agent")
 
 
 @app.middleware("http")
