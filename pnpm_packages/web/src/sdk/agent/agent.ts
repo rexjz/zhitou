@@ -35,7 +35,7 @@ import type {
 /**
  * @summary Agui Proxy
  */
-export const aguiProxyApiAgentAguiPathPost = (
+export const runAguiAgent = (
     path: string, options?: AxiosRequestConfig
  ): Promise<AxiosResponse<unknown>> => {
     return axios.post(
@@ -45,27 +45,27 @@ export const aguiProxyApiAgentAguiPathPost = (
 
 
 
-export const getAguiProxyApiAgentAguiPathPostMutationFetcher = (path: string, options?: AxiosRequestConfig) => {
+export const getRunAguiAgentMutationFetcher = (path: string, options?: AxiosRequestConfig) => {
   return (_: Key, __: { arg: Arguments }) => {
-    return aguiProxyApiAgentAguiPathPost(path, options);
+    return runAguiAgent(path, options);
   }
 }
-export const getAguiProxyApiAgentAguiPathPostMutationKey = (path: string,) => [`/api/agent/agui/${path}`] as const;
+export const getRunAguiAgentMutationKey = (path: string,) => [`/api/agent/agui/${path}`] as const;
 
-export type AguiProxyApiAgentAguiPathPostMutationResult = NonNullable<Awaited<ReturnType<typeof aguiProxyApiAgentAguiPathPost>>>
-export type AguiProxyApiAgentAguiPathPostMutationError = AxiosError<HTTPValidationError>
+export type RunAguiAgentMutationResult = NonNullable<Awaited<ReturnType<typeof runAguiAgent>>>
+export type RunAguiAgentMutationError = AxiosError<HTTPValidationError>
 
 /**
  * @summary Agui Proxy
  */
-export const useAguiProxyApiAgentAguiPathPost = <TError = AxiosError<HTTPValidationError>>(
-  path: string, options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof aguiProxyApiAgentAguiPathPost>>, TError, Key, Arguments, Awaited<ReturnType<typeof aguiProxyApiAgentAguiPathPost>>> & { swrKey?: string }, axios?: AxiosRequestConfig}
+export const useRunAguiAgent = <TError = AxiosError<HTTPValidationError>>(
+  path: string, options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof runAguiAgent>>, TError, Key, Arguments, Awaited<ReturnType<typeof runAguiAgent>>> & { swrKey?: string }, axios?: AxiosRequestConfig}
 ) => {
 
   const {swr: swrOptions, axios: axiosOptions} = options ?? {}
 
-  const swrKey = swrOptions?.swrKey ?? getAguiProxyApiAgentAguiPathPostMutationKey(path);
-  const swrFn = getAguiProxyApiAgentAguiPathPostMutationFetcher(path, axiosOptions);
+  const swrKey = swrOptions?.swrKey ?? getRunAguiAgentMutationKey(path);
+  const swrFn = getRunAguiAgentMutationFetcher(path, axiosOptions);
 
   const query = useSWRMutation(swrKey, swrFn, swrOptions)
 
@@ -77,7 +77,7 @@ export const useAguiProxyApiAgentAguiPathPost = <TError = AxiosError<HTTPValidat
 /**
  * @summary Status Proxy
  */
-export const statusProxyApiAgentStatusGet = (
+export const aguiStatus = (
      options?: AxiosRequestConfig
  ): Promise<AxiosResponse<unknown>> => {
     return axios.get(
@@ -87,22 +87,22 @@ export const statusProxyApiAgentStatusGet = (
 
 
 
-export const getStatusProxyApiAgentStatusGetKey = () => [`/api/agent/status`] as const;
+export const getAguiStatusKey = () => [`/api/agent/status`] as const;
 
-export type StatusProxyApiAgentStatusGetQueryResult = NonNullable<Awaited<ReturnType<typeof statusProxyApiAgentStatusGet>>>
-export type StatusProxyApiAgentStatusGetQueryError = AxiosError<HTTPValidationError>
+export type AguiStatusQueryResult = NonNullable<Awaited<ReturnType<typeof aguiStatus>>>
+export type AguiStatusQueryError = AxiosError<HTTPValidationError>
 
 /**
  * @summary Status Proxy
  */
-export const useStatusProxyApiAgentStatusGet = <TError = AxiosError<HTTPValidationError>>(
-   options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof statusProxyApiAgentStatusGet>>, TError> & { swrKey?: Key, enabled?: boolean }, axios?: AxiosRequestConfig }
+export const useAguiStatus = <TError = AxiosError<HTTPValidationError>>(
+   options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof aguiStatus>>, TError> & { swrKey?: Key, enabled?: boolean }, axios?: AxiosRequestConfig }
 ) => {
   const {swr: swrOptions, axios: axiosOptions} = options ?? {}
 
   const isEnabled = swrOptions?.enabled !== false
-  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getStatusProxyApiAgentStatusGetKey() : null);
-  const swrFn = () => statusProxyApiAgentStatusGet(axiosOptions)
+  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getAguiStatusKey() : null);
+  const swrFn = () => aguiStatus(axiosOptions)
 
   const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
 

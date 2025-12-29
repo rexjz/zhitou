@@ -18,7 +18,7 @@ class CurrentUserResponseData(BaseModel):
   email: Optional[str] = Field(..., description="User email address")
 
 
-@user_router.get("/me")
+@user_router.get("/me", operation_id="get current user")
 def get_current_user_info(
   current_user: UserModel = Depends(get_current_user),
 ) -> APIResponse[CurrentUserResponseData]:

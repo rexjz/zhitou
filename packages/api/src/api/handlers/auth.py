@@ -36,7 +36,7 @@ class SignInRequest(BaseModel):
   password: str
 
 
-@auth_router.post("/signin/upass")
+@auth_router.post("/signin/upass",  operation_id="signin upass")
 def signin(
   data: SignInRequest,
   response: Response,
@@ -58,9 +58,38 @@ def signin(
       samesite="lax",
       max_age=7200,
     )
+    response.set_cookie(
+      key=app_state.config.jwt.login_flag_cookie_name,
+      value=True,
+      httponly=False,
+      secure=app_state.config.jwt.cookie_secure,
+      samesite="lax",
+      max_age=7200,
+    )
 
     return APIResponse(message="Sign in successful")
   else:
     raise HTTPException(
       status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid username or password"
     )
+
+
+@auth_router.post("/signout",  operation_id="signout")
+def signout(
+  response: Response,
+  app_state: Annotated[AppState, Depends(get_app_state_dep)],
+):
+  response.delete_cookie(
+    key=app_state.config.jwt.cookie_name,
+    httponly=True,
+    secure=app_state.config.jwt.cookie_secure,
+    samesite="lax",
+  )
+  response.delete_cookie(
+    key=app_state.config.jwt.login_flag_cookie_name,
+    httponly=False,
+    secure=app_state.config.jwt.cookie_secure,
+    samesite="lax",
+  )
+
+  return APIResponse(message="Sign out successful")
