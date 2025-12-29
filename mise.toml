@@ -23,3 +23,6 @@ run = "uv run --package zhitou_agent zhitou-agent-cli"
 
 [tasks.dev-api]
 run = "uv run api-dev"
+
+[tasks.web-gen]
+run = "pnpm --filter web gen"
