@@ -28,6 +28,8 @@ china_annual_report_soures:
 jwt:
   secret_key: ''
   cookie_secure: true
+  cookie_name: 'zhitou-access-token'
+  login_flag_cookie_name: 'zhitou-logged-in'
 
 dashscpope:
   apikey: ''

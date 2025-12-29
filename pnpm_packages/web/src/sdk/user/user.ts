@@ -33,7 +33,7 @@ Returns:
   User information including id, username, and email
  * @summary Get Current User Info
  */
-export const getCurrentUserInfoApiUserMeGet = (
+export const getCurrentUser = (
      options?: AxiosRequestConfig
  ): Promise<AxiosResponse<APIResponseCurrentUserResponseData>> => {
     return axios.get(
@@ -43,22 +43,22 @@ export const getCurrentUserInfoApiUserMeGet = (
 
 
 
-export const getGetCurrentUserInfoApiUserMeGetKey = () => [`/api/user/me`] as const;
+export const getGetCurrentUserKey = () => [`/api/user/me`] as const;
 
-export type GetCurrentUserInfoApiUserMeGetQueryResult = NonNullable<Awaited<ReturnType<typeof getCurrentUserInfoApiUserMeGet>>>
-export type GetCurrentUserInfoApiUserMeGetQueryError = AxiosError<unknown>
+export type GetCurrentUserQueryResult = NonNullable<Awaited<ReturnType<typeof getCurrentUser>>>
+export type GetCurrentUserQueryError = AxiosError<unknown>
 
 /**
  * @summary Get Current User Info
  */
-export const useGetCurrentUserInfoApiUserMeGet = <TError = AxiosError<unknown>>(
-   options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof getCurrentUserInfoApiUserMeGet>>, TError> & { swrKey?: Key, enabled?: boolean }, axios?: AxiosRequestConfig }
+export const useGetCurrentUser = <TError = AxiosError<unknown>>(
+   options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof getCurrentUser>>, TError> & { swrKey?: Key, enabled?: boolean }, axios?: AxiosRequestConfig }
 ) => {
   const {swr: swrOptions, axios: axiosOptions} = options ?? {}
 
   const isEnabled = swrOptions?.enabled !== false
-  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getGetCurrentUserInfoApiUserMeGetKey() : null);
-  const swrFn = () => getCurrentUserInfoApiUserMeGet(axiosOptions)
+  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getGetCurrentUserKey() : null);
+  const swrFn = () => getCurrentUser(axiosOptions)
 
   const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
 

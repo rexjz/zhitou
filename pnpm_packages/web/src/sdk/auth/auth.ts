@@ -12,6 +12,7 @@ import type {
 } from 'axios';
 
 import type {
+  Arguments,
   Key
 } from 'swr';
 
@@ -77,7 +78,7 @@ export const useSignupApiAuthSignupPost = <TError = AxiosError<HTTPValidationErr
 /**
  * @summary Signin
  */
-export const signinApiAuthSigninUpassPost = (
+export const signinUpass = (
     signInRequest: SignInRequest, options?: AxiosRequestConfig
  ): Promise<AxiosResponse<unknown>> => {
     return axios.post(
@@ -88,27 +89,69 @@ export const signinApiAuthSigninUpassPost = (
 
 
 
-export const getSigninApiAuthSigninUpassPostMutationFetcher = ( options?: AxiosRequestConfig) => {
+export const getSigninUpassMutationFetcher = ( options?: AxiosRequestConfig) => {
   return (_: Key, { arg }: { arg: SignInRequest }) => {
-    return signinApiAuthSigninUpassPost(arg, options);
+    return signinUpass(arg, options);
   }
 }
-export const getSigninApiAuthSigninUpassPostMutationKey = () => [`/api/auth/signin/upass`] as const;
+export const getSigninUpassMutationKey = () => [`/api/auth/signin/upass`] as const;
 
-export type SigninApiAuthSigninUpassPostMutationResult = NonNullable<Awaited<ReturnType<typeof signinApiAuthSigninUpassPost>>>
-export type SigninApiAuthSigninUpassPostMutationError = AxiosError<HTTPValidationError>
+export type SigninUpassMutationResult = NonNullable<Awaited<ReturnType<typeof signinUpass>>>
+export type SigninUpassMutationError = AxiosError<HTTPValidationError>
 
 /**
  * @summary Signin
  */
-export const useSigninApiAuthSigninUpassPost = <TError = AxiosError<HTTPValidationError>>(
-   options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof signinApiAuthSigninUpassPost>>, TError, Key, SignInRequest, Awaited<ReturnType<typeof signinApiAuthSigninUpassPost>>> & { swrKey?: string }, axios?: AxiosRequestConfig}
+export const useSigninUpass = <TError = AxiosError<HTTPValidationError>>(
+   options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof signinUpass>>, TError, Key, SignInRequest, Awaited<ReturnType<typeof signinUpass>>> & { swrKey?: string }, axios?: AxiosRequestConfig}
 ) => {
 
   const {swr: swrOptions, axios: axiosOptions} = options ?? {}
 
-  const swrKey = swrOptions?.swrKey ?? getSigninApiAuthSigninUpassPostMutationKey();
-  const swrFn = getSigninApiAuthSigninUpassPostMutationFetcher(axiosOptions);
+  const swrKey = swrOptions?.swrKey ?? getSigninUpassMutationKey();
+  const swrFn = getSigninUpassMutationFetcher(axiosOptions);
+
+  const query = useSWRMutation(swrKey, swrFn, swrOptions)
+
+  return {
+    swrKey,
+    ...query
+  }
+}
+/**
+ * @summary Signout
+ */
+export const signout = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<unknown>> => {
+    return axios.post(
+      `/api/auth/signout`,undefined,options
+    );
+  }
+
+
+
+export const getSignoutMutationFetcher = ( options?: AxiosRequestConfig) => {
+  return (_: Key, __: { arg: Arguments }) => {
+    return signout(options);
+  }
+}
+export const getSignoutMutationKey = () => [`/api/auth/signout`] as const;
+
+export type SignoutMutationResult = NonNullable<Awaited<ReturnType<typeof signout>>>
+export type SignoutMutationError = AxiosError<unknown>
+
+/**
+ * @summary Signout
+ */
+export const useSignout = <TError = AxiosError<unknown>>(
+   options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof signout>>, TError, Key, Arguments, Awaited<ReturnType<typeof signout>>> & { swrKey?: string }, axios?: AxiosRequestConfig}
+) => {
+
+  const {swr: swrOptions, axios: axiosOptions} = options ?? {}
+
+  const swrKey = swrOptions?.swrKey ?? getSignoutMutationKey();
+  const swrFn = getSignoutMutationFetcher(axiosOptions);
 
   const query = useSWRMutation(swrKey, swrFn, swrOptions)
 

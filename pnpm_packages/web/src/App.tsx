@@ -5,6 +5,8 @@ import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { Helmet } from "react-helmet-async";
 import HomePage from "./pages/HomePage";
 import Page2 from "./pages/Page2";
+import SignInPage from "./pages/auth/Signin";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 
 const App = () => {
@@ -16,7 +18,15 @@ const App = () => {
         </Helmet>
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/dashboard" element={<DashboardLayout />}>
+          <Route path="/signin" element={<SignInPage />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout />
+              </ProtectedRoute>
+            }
+          >
             <Route index element={<HomePage />} />
             <Route path="page2" element={<Page2 />} />
           </Route>
