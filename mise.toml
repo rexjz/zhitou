@@ -16,7 +16,7 @@ run = [
 ]
 
 [tasks.dev-web]
-run = "pnpm --filter web dev"
+run = "pnpm --filter web gen && pnpm --filter web dev"
 
 [tasks.agent-cli]
 run = "uv run --package zhitou_agent zhitou-agent-cli"

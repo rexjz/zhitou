@@ -33,32 +33,32 @@ Returns:
   User information including id, username, and email
  * @summary Get Current User Info
  */
-export const getCurrentUserInfoUserMeGet = (
+export const getCurrentUserInfoApiUserMeGet = (
      options?: AxiosRequestConfig
  ): Promise<AxiosResponse<APIResponseCurrentUserResponseData>> => {
     return axios.get(
-      `/user/me`,options
+      `/api/user/me`,options
     );
   }
 
 
 
-export const getGetCurrentUserInfoUserMeGetKey = () => [`/user/me`] as const;
+export const getGetCurrentUserInfoApiUserMeGetKey = () => [`/api/user/me`] as const;
 
-export type GetCurrentUserInfoUserMeGetQueryResult = NonNullable<Awaited<ReturnType<typeof getCurrentUserInfoUserMeGet>>>
-export type GetCurrentUserInfoUserMeGetQueryError = AxiosError<unknown>
+export type GetCurrentUserInfoApiUserMeGetQueryResult = NonNullable<Awaited<ReturnType<typeof getCurrentUserInfoApiUserMeGet>>>
+export type GetCurrentUserInfoApiUserMeGetQueryError = AxiosError<unknown>
 
 /**
  * @summary Get Current User Info
  */
-export const useGetCurrentUserInfoUserMeGet = <TError = AxiosError<unknown>>(
-   options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof getCurrentUserInfoUserMeGet>>, TError> & { swrKey?: Key, enabled?: boolean }, axios?: AxiosRequestConfig }
+export const useGetCurrentUserInfoApiUserMeGet = <TError = AxiosError<unknown>>(
+   options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof getCurrentUserInfoApiUserMeGet>>, TError> & { swrKey?: Key, enabled?: boolean }, axios?: AxiosRequestConfig }
 ) => {
   const {swr: swrOptions, axios: axiosOptions} = options ?? {}
 
   const isEnabled = swrOptions?.enabled !== false
-  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getGetCurrentUserInfoUserMeGetKey() : null);
-  const swrFn = () => getCurrentUserInfoUserMeGet(axiosOptions)
+  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getGetCurrentUserInfoApiUserMeGetKey() : null);
+  const swrFn = () => getCurrentUserInfoApiUserMeGet(axiosOptions)
 
   const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
 
