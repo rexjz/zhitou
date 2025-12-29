@@ -24,7 +24,8 @@ import type {
 } from 'swr/mutation';
 
 import type {
-  HTTPValidationError
+  HTTPValidationError,
+  RunAguiAgentParams
 } from '.././models';
 
 
@@ -36,21 +37,23 @@ import type {
  * @summary Agui Proxy
  */
 export const runAguiAgent = (
-    path: string, options?: AxiosRequestConfig
+    params: RunAguiAgentParams, options?: AxiosRequestConfig
  ): Promise<AxiosResponse<unknown>> => {
     return axios.post(
-      `/api/agent/agui/${path}`,undefined,options
+      `/api/agent/agui`,undefined,{
+    ...options,
+        params: {...params, ...options?.params},}
     );
   }
 
 
 
-export const getRunAguiAgentMutationFetcher = (path: string, options?: AxiosRequestConfig) => {
+export const getRunAguiAgentMutationFetcher = (params: RunAguiAgentParams, options?: AxiosRequestConfig) => {
   return (_: Key, __: { arg: Arguments }) => {
-    return runAguiAgent(path, options);
+    return runAguiAgent(params, options);
   }
 }
-export const getRunAguiAgentMutationKey = (path: string,) => [`/api/agent/agui/${path}`] as const;
+export const getRunAguiAgentMutationKey = (params: RunAguiAgentParams,) => [`/api/agent/agui`, ...(params ? [params]: [])] as const;
 
 export type RunAguiAgentMutationResult = NonNullable<Awaited<ReturnType<typeof runAguiAgent>>>
 export type RunAguiAgentMutationError = AxiosError<HTTPValidationError>
@@ -59,13 +62,13 @@ export type RunAguiAgentMutationError = AxiosError<HTTPValidationError>
  * @summary Agui Proxy
  */
 export const useRunAguiAgent = <TError = AxiosError<HTTPValidationError>>(
-  path: string, options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof runAguiAgent>>, TError, Key, Arguments, Awaited<ReturnType<typeof runAguiAgent>>> & { swrKey?: string }, axios?: AxiosRequestConfig}
+  params: RunAguiAgentParams, options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof runAguiAgent>>, TError, Key, Arguments, Awaited<ReturnType<typeof runAguiAgent>>> & { swrKey?: string }, axios?: AxiosRequestConfig}
 ) => {
 
   const {swr: swrOptions, axios: axiosOptions} = options ?? {}
 
-  const swrKey = swrOptions?.swrKey ?? getRunAguiAgentMutationKey(path);
-  const swrFn = getRunAguiAgentMutationFetcher(path, axiosOptions);
+  const swrKey = swrOptions?.swrKey ?? getRunAguiAgentMutationKey(params);
+  const swrFn = getRunAguiAgentMutationFetcher(params, axiosOptions);
 
   const query = useSWRMutation(swrKey, swrFn, swrOptions)
 
