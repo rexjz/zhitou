@@ -6,12 +6,12 @@ import {
 export const menuData = [
   {
     path: '/dashboard',
-    name: 'HomePage',
+    name: '首页',
     icon: <HomeOutlined />,
   },
   {
-    path: '/dashboard/page2',
-    name: 'Page2',
+    path: '/dashboard/agent',
+    name: '智能体',
     icon: <HomeOutlined />,
   },
 ];

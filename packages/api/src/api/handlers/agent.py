@@ -7,7 +7,7 @@ from loguru import logger
 agent_app = APIRouter(dependencies=[Depends(get_current_user)], tags=["Agent"])
 
 
-@agent_app.post("/agui/{path:path}", operation_id="run agui agent")
+@agent_app.post("/agui", operation_id="run agui agent")
 async def agui_proxy(
   path: str,
   request: Request,

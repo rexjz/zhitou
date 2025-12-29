@@ -64,6 +64,7 @@ def create_agno_zhitou_agent(
   bocha_tools = BoChaTools(apikey=bocha.apikey)
 
   agent = Agent(
+    name="zhitou_agent",
     model=OpenAILike(
       base_url=dashscpope.openai_compatible_base_url,
       api_key=dashscpope.apikey,

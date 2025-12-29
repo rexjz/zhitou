@@ -10,6 +10,7 @@ export * from './aPIResponseCurrentUserResponseDataData';
 export * from './currentUserResponseData';
 export * from './currentUserResponseDataEmail';
 export * from './hTTPValidationError';
+export * from './runAguiAgentParams';
 export * from './signInRequest';
 export * from './signUpRequest';
 export * from './validationError';

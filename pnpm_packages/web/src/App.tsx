@@ -4,9 +4,9 @@ import { Providers } from "./providers";
 import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { Helmet } from "react-helmet-async";
 import HomePage from "./pages/HomePage";
-import Page2 from "./pages/Page2";
 import SignInPage from "./pages/auth/Signin";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import BasicChatPage from "./pages/BasicChatPage";
 
 
 const App = () => {
@@ -28,7 +28,7 @@ const App = () => {
             }
           >
             <Route index element={<HomePage />} />
-            <Route path="page2" element={<Page2 />} />
+            <Route path="agent" element={<BasicChatPage />} />
           </Route>
         </Routes>
       </Providers>

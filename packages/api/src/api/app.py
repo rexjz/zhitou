@@ -18,7 +18,7 @@ from api.handlers.auth import auth_router
 from api.handlers.user import user_router
 from api.handlers.system import system_router
 from api.handlers.agent import agent_app
-
+from zhitou_agent.ag_ui.agui_app import create_agui_agno_app
 from typing import cast
 
 import uvicorn
