@@ -99,9 +99,9 @@ async def handle_biz_error(request: Request, exc: BizError):
 
 
 app.include_router(system_router)
-app.include_router(auth_router, prefix="/auth")
-app.include_router(user_router, prefix="/user")
-app.include_router(agent_app, prefix="/agent")
+app.include_router(auth_router, prefix="/api/auth")
+app.include_router(user_router, prefix="/api/user")
+app.include_router(agent_app, prefix="/api/agent")
 
 
 @app.middleware("http")
