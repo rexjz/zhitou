@@ -9,7 +9,6 @@ agent_app = APIRouter(dependencies=[Depends(get_current_user)], tags=["Agent"])
 
 @agent_app.post("/agui", operation_id="run agui agent")
 async def agui_proxy(
-  path: str,
   request: Request,
   current_user: UserModel = Depends(get_current_user),
   x_agent_session_id: Annotated[str | None, Header(alias="X-Agent-Session-ID")] = None,
@@ -89,56 +88,3 @@ async def status_proxy(
     status_code=response_start["status"],
     headers=headers,
   )
-
-
-@agent_app.post("/proxy/copilotkit")
-async def proxy_mixed(request: Request):
-    # 读取原始请求体
-    body = await request.body()
-
-    # 构造转发 headers（剥离 Host 避免冲突）
-    forward_headers = {
-        k: v
-        for k, v in request.headers.items()
-        if k.lower() != "host"
-    }
-
-    async with httpx.AsyncClient(timeout=None) as client:
-        # 发起流式请求（stream=True 保证可以实时读取）
-        upstream_resp = await client.post(
-            TARGET_URL,
-            content=body,
-            headers=forward_headers,
-            params=request.query_params,
-            stream=True,
-        )
-
-        # 判断响应是否 SSE
-        content_type = upstream_resp.headers.get("content-type", "")
-
-        # SSE 情况（EventSource/text event-stream）
-        if "text/event-stream" in content_type:
-            async def stream_iter():
-                # 一边从上游读一边 Yield chunk
-                async for chunk in upstream_resp.aiter_bytes():
-                    yield chunk
-                # 注意流结束后自动 close client
-            return StreamingResponse(
-                stream_iter(),
-                media_type="text/event-stream"
-            )
-
-        # 非 SSE 情况 —— 普通读取 body 然后返回
-        data = await upstream_resp.aread()
-        headers = {
-            k: v
-            for k, v in upstream_resp.headers.items()
-            # 过滤掉某些不适合转发给客户端的头
-            if k.lower() not in {"content-encoding", "transfer-encoding", "connection"}
-        }
-
-        # 根据上游返回的 content-type 决定用 JSONResponse 或普通 Response
-        if "application/json" in content_type:
-            return JSONResponse(content=data, status_code=upstream_resp.status_code, headers=headers)
-        else:
-            return Response(content=data, status_code=upstream_resp.status_code, headers=headers)
