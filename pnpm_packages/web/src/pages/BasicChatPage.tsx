@@ -17,14 +17,12 @@ const BasicChatPage: React.FC = () => {
 
   return (
     <CopilotKit
-      
-      runtimeUrl=""
+      runtimeUrl="http://localhost:6010/copilotkit"
       showDevConsole
-      agent="zhitou_agent"
+      agent="default"
       headers={{
         "X-Agent-Session-ID": sessionId
       }}
-      
     >
       <Chat />
     </CopilotKit>

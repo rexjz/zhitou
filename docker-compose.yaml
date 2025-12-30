@@ -41,6 +41,10 @@ services:
     ports:
       - "${GLOBAL__REDIS__PORT:-6379}:6379"
     restart: always
+  
+  api-agteway:
+    image: nginx
+    
 
 volumes:
   postgres-data:
