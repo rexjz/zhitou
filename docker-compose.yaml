@@ -43,8 +43,13 @@ services:
     restart: always
   
   api-agteway:
-    image: nginx
-    
+    image: nginx:1.28
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "6007:6007"
+    volumes:
+      - ./config/api-gateway-nginx/${ENV:-dev}.conf:/etc/nginx/nginx.conf:ro
 
 volumes:
   postgres-data:

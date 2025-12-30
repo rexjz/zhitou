@@ -127,5 +127,9 @@
   [role="button"]:not(:disabled) {
     cursor: pointer;
   }
+}
 
+/* hide Powered By CopilotKit */
+.poweredBy {
+  visibility: hidden !important;
 }

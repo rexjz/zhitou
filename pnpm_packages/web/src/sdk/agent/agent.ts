@@ -114,3 +114,45 @@ export const useAguiStatus = <TError = AxiosError<HTTPValidationError>>(
     ...query
   }
 }
+/**
+ * @summary Proxy Mixed
+ */
+export const proxyMixedApiAgentProxyCopilotkitPost = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<unknown>> => {
+    return axios.post(
+      `/api/agent/proxy/copilotkit`,undefined,options
+    );
+  }
+
+
+
+export const getProxyMixedApiAgentProxyCopilotkitPostMutationFetcher = ( options?: AxiosRequestConfig) => {
+  return (_: Key, __: { arg: Arguments }) => {
+    return proxyMixedApiAgentProxyCopilotkitPost(options);
+  }
+}
+export const getProxyMixedApiAgentProxyCopilotkitPostMutationKey = () => [`/api/agent/proxy/copilotkit`] as const;
+
+export type ProxyMixedApiAgentProxyCopilotkitPostMutationResult = NonNullable<Awaited<ReturnType<typeof proxyMixedApiAgentProxyCopilotkitPost>>>
+export type ProxyMixedApiAgentProxyCopilotkitPostMutationError = AxiosError<unknown>
+
+/**
+ * @summary Proxy Mixed
+ */
+export const useProxyMixedApiAgentProxyCopilotkitPost = <TError = AxiosError<unknown>>(
+   options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof proxyMixedApiAgentProxyCopilotkitPost>>, TError, Key, Arguments, Awaited<ReturnType<typeof proxyMixedApiAgentProxyCopilotkitPost>>> & { swrKey?: string }, axios?: AxiosRequestConfig}
+) => {
+
+  const {swr: swrOptions, axios: axiosOptions} = options ?? {}
+
+  const swrKey = swrOptions?.swrKey ?? getProxyMixedApiAgentProxyCopilotkitPostMutationKey();
+  const swrFn = getProxyMixedApiAgentProxyCopilotkitPostMutationFetcher(axiosOptions);
+
+  const query = useSWRMutation(swrKey, swrFn, swrOptions)
+
+  return {
+    swrKey,
+    ...query
+  }
+}
