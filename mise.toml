@@ -12,7 +12,7 @@ python.uv_venv_auto = true
 [tasks.setup]
 run = [
   "pnpm install",
-  "uv sync --all-packages",         # 安装 uv workspace 依赖
+  "uv sync --all-packages", # 安装 uv workspace 依赖
 ]
 
 [tasks.dev-web]
@@ -22,7 +22,17 @@ run = "pnpm --filter web gen && pnpm --filter web dev"
 run = "uv run --package zhitou_agent zhitou-agent-cli"
 
 [tasks.dev-api]
+run = [
+  "uv run api-dev &",
+  "pnpm -F copilotkit-server dev"
+]
+
+[tasks.fastapi-dev]
 run = "uv run api-dev"
+
+[tasks.copilotkit-server-dev]
+depends = ["fastapi-dev"]
+run = "pnpm -F copilotkit-server dev"
 
 [tasks.web-gen]
 run = "pnpm --filter web gen"
