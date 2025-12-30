@@ -4,7 +4,7 @@ import sys
 from confz import BaseConfig
 from core.config.config_loader import ConfigLoader
 from core.config import DashsopeConfig, BochaConfig
-from core.config.models import LoggingConfig
+from core.config.models import DatabaseConfig, LoggingConfig
 from loguru import logger
 
 
@@ -12,6 +12,7 @@ class ZhitouAgentConfig(BaseConfig):
   dashscpope: DashsopeConfig
   bocha: BochaConfig
   logging: LoggingConfig
+  postgres: DatabaseConfig
 
 class ZhitouAgentConfigLoader(ConfigLoader[ZhitouAgentConfig]):
   config_class = ZhitouAgentConfig
