@@ -59,12 +59,11 @@ module.exports = {
     open: true,
     proxy: [
       {
-        context: ['/api'],
-        target: 'http://localhost:6008',
+        context: ['/api', '/proxy'],
+        target: 'http://localhost:6007',
       },
+
     ]
   },
-
-
   mode: "development",
 };
