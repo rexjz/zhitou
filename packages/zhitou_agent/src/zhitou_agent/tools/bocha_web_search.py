@@ -107,7 +107,7 @@ class BoChaTools:
           "imageResults": formatted_image_results,
         }
 
-        return json_result
+        return json.dumps(json_result, indent=2) # 这里注意要返回合法JSON String，不然agui前端tool call reponse组件比较难处理
 
     except httpx.HTTPStatusError as e:
       logger.exception("")
