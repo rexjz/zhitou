@@ -15,15 +15,25 @@ app.use(cors({
 
 class DynamicHeaderAgent extends HttpAgent {
   protected requestInit(input: RunAgentInput) {
-    const init = super.requestInit(input);
     const dynamicHeaders = (input.forwardedProps?.forwardedHeaders) || {};
-    return {
+
+    delete input.forwardedProps?.forwardedHeaders
+    const init = super.requestInit(input);
+ 
+
+
+    const request: any = {
       ...init,
       headers: {
         ...init.headers,
         ...dynamicHeaders,  // 把你的 header 注入进去
       },
     };
+    console.log(request)
+
+
+    console.log(JSON.stringify(request, null, 2))
+    return request
   }
 }
 
@@ -40,13 +50,21 @@ const serviceAdapter = new ExperimentalEmptyAdapter();
 app.post(
   "/copilotkit",
   (req: any, res, next) => {
-    req.body.forwardedProps = {
-      ...req.body.forwardedProps,
-      forwardedHeaders: {
-        Authorization: req.headers.authorization,
-        "x-custom": req.headers["x-custom"],
-      },
-    };
+    if(req.body.body) {
+
+      const forwardedHeaders: any = {
+        Cookie: req.headers.cookie // 如果你永远要加 Cookie
+      };
+
+      if (req.headers['x-agent-session-id']) {
+        forwardedHeaders['X-Agent-Session-ID'] = req.headers['x-agent-session-id'];
+      }
+
+      req.body.body.forwardedProps = {
+        ...req.body.body.forwardedProps,
+        forwardedHeaders: forwardedHeaders,
+      };
+    } 
     next();
   },
   copilotRuntimeNodeExpressEndpoint({
@@ -58,6 +76,6 @@ app.post(
 
 app.get("/health", (_req, res) => res.send("ok"));
 
-app.listen(6010, () => {
-  console.log("Listening on http://localhost:6010");
+app.listen(6010, "0.0.0.0", () => {
+  console.log("Listening on 6010");
 });
