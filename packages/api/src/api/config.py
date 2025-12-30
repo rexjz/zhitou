@@ -1,7 +1,15 @@
-
 from confz import BaseConfig
 from core.config.config_loader import ConfigLoader
-from core.config.models import AgentConfig, DatabaseConfig, RedisConfig, ServerConfig, LoggingConfig, JWTConfig
+from core.config.models import (
+  AgentConfig,
+  DatabaseConfig,
+  RedisConfig,
+  ServerConfig,
+  LoggingConfig,
+  JWTConfig,
+  CopilotkitServerConfig,
+)
+
 
 class APIConfig(BaseConfig):
   database: DatabaseConfig
@@ -10,6 +18,8 @@ class APIConfig(BaseConfig):
   redis: RedisConfig
   jwt: JWTConfig
   agent: AgentConfig
+  copilotkit_server: CopilotkitServerConfig
+
 
 class APIConfigLoader(ConfigLoader):
   config_class = APIConfig

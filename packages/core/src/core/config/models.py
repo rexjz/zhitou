@@ -57,3 +57,6 @@ class BochaConfig(BaseModel):
 
 class AgentConfig(BaseModel):
   memory_base_dir: str
+
+class CopilotkitServerConfig(BaseModel):
+  endpoint: str

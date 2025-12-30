@@ -40,3 +40,6 @@ bocha:
 
 agent:
   memory_base_dir: ''
+
+copilotkit_server:
+  endpoint: http://localhost:6010/copilotkit
