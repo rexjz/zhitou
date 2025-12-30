@@ -1,11 +1,12 @@
 from typing import Optional
 from agno.agent import Agent
 from agno.models.openai.like import OpenAILike
-from core.config.models import BochaConfig, DashsopeConfig
+from core.config.models import BochaConfig, DashsopeConfig, DatabaseConfig
 from zhitou_agent.config import ZhitouAgentConfig
 from zhitou_agent.tools.bocha_web_search import BoChaTools
 from zhitou_agent.prompt.system import system_prompt
 from agno.db.sqlite import SqliteDb
+from agno.db.postgres import PostgresDb
 from agno.agent import RunEvent
 
 
@@ -58,6 +59,7 @@ async def run_ango_agent(config: ZhitouAgentConfig):
 def create_agno_zhitou_agent(
   bocha: BochaConfig,
   dashscpope: DashsopeConfig,
+  postgres: DatabaseConfig,
   session_id: str,
   user_id: Optional[str] = None,
 ):
@@ -73,7 +75,7 @@ def create_agno_zhitou_agent(
     tools=[bocha_tools.web_search],
     instructions=system_prompt,
     max_tool_calls_from_history=3,
-    db=SqliteDb(db_file="/home/rexjz/Workspace/dianzhang/zhitou/.logs/agno.db"),
+    db=PostgresDb(postgres.url),
     add_history_to_context=True,
     add_datetime_to_context=True,
     timezone_identifier="Asia/Shanghai",

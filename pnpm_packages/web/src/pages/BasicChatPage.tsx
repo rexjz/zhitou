@@ -36,14 +36,13 @@ const BasicChatPage: React.FC = () => {
 
 const Chat = () => {
   return (
-    <div className="flex justify-center items-center h-full w-full">
-      <div className="h-full w-full rounded-lg">
-        <CopilotChat
-          className="h-full rounded-2xl max-w-6xl mx-auto"
-          labels={{ initial: "Hi, I'm an agent. Want to chat?" }}
-          suggestions="auto"
-        />
-      </div>
+    <div className="h-[calc(100vh-152px)] w-full rounded-lg">
+      <CopilotChat
+        className="h-full w-full rounded-lg"
+        labels={{ initial: "你好，我有什么能帮你的？", placeholder: "在这里输入" }}
+        suggestions="auto"
+        hideStopButton
+      />
     </div>
   );
 };
