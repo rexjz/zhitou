@@ -20,7 +20,8 @@ class BoChaTools:
     query: str,
     count: int = 10,
   ) -> ToolResponse:
-    """Search the web using Bocha API and return results. You shuold always call this tool why you are not 100% sure about facts
+    """Search the web using Bocha API and return results. You shuold always call this tool why you are not 100% sure about facts.
+    Don't try to search too many keywords at one time, split into multiple searching if you are not menat to joint search.
 
     Args:
       query (`str`):

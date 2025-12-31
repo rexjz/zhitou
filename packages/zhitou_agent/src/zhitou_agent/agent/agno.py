@@ -1,10 +1,14 @@
 from typing import Optional
 from agno.agent import Agent
 from agno.models.openai.like import OpenAILike
+from agno.models.openai.chat import OpenAIChat
 from core.config.models import BochaConfig, DashsopeConfig, DatabaseConfig
 from zhitou_agent.config import ZhitouAgentConfig
 from zhitou_agent.tools.bocha_web_search import BoChaTools
 from zhitou_agent.prompt.system import system_prompt
+from agno.models.dashscope import DashScope
+from agno.tools.reasoning import ReasoningTools
+
 from agno.db.sqlite import SqliteDb
 from agno.db.postgres import PostgresDb
 from agno.agent import RunEvent
@@ -15,6 +19,7 @@ async def run_ango_agent(config: ZhitouAgentConfig):
     bocha=config.bocha,
     dashscpope=config.dashscpope,
     session_id="test1",
+    postgres=config.database,
   )
 
   print("Agent initialized. Type 'quit' or 'exit' to stop.")
@@ -27,14 +32,12 @@ async def run_ango_agent(config: ZhitouAgentConfig):
       if not user_input:
         continue
 
-      if user_input.lower() in ['quit', 'exit']:
+      if user_input.lower() in ["quit", "exit"]:
         print("Goodbye!")
         break
 
       print("Agent: ", end="")
-      event_stream = agent.arun(
-        user_input, stream=True, stream_events=True
-      )
+      event_stream = agent.arun(user_input, stream=True, stream_events=True)
 
       async for event in event_stream:
         if event.event == RunEvent.run_content:
@@ -67,20 +70,25 @@ def create_agno_zhitou_agent(
 
   agent = Agent(
     name="zhitou_agent",
-    model=OpenAILike(
+    model=DashScope(
       base_url=dashscpope.openai_compatible_base_url,
       api_key=dashscpope.apikey,
-      id="qwen-max",
+      id="qwen3-max-preview",
     ),
-    tools=[bocha_tools.web_search],
+    tools=[bocha_tools.web_search, ReasoningTools(add_instructions=True)],
     instructions=system_prompt,
     max_tool_calls_from_history=3,
-    db=PostgresDb(postgres.url),
+    db=PostgresDb(postgres.url, db_schema="agno"),
+    num_history_runs=15,
     add_history_to_context=True,
     add_datetime_to_context=True,
     timezone_identifier="Asia/Shanghai",
     markdown=True,
     session_id=session_id,
     user_id=user_id,
+    # reasoning=True,
+    # reasoning_model=OpenAIChat(
+    # ),
+    stream=True,
   )
   return agent

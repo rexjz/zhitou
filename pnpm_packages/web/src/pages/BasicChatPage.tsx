@@ -4,6 +4,7 @@ import { CopilotKit } from "@copilotkit/react-core";
 import { CopilotChat } from "@copilotkit/react-ui";
 import { HttpAgent } from "@ag-ui/client";
 import { WebSeachToolCallRenderer } from "@/components/ToolCall/web_search";
+import { ThinkToolCallRenderer } from "@/components/ToolCall/think";
 
 const generateSessionId = () => {
   return `session_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
@@ -25,7 +26,8 @@ const BasicChatPage: React.FC = () => {
         "X-Agent-Session-ID": sessionId
       }}
       renderToolCalls={[
-        WebSeachToolCallRenderer
+        WebSeachToolCallRenderer,
+        ThinkToolCallRenderer
       ]}
       // renderToolCalls={}
     >

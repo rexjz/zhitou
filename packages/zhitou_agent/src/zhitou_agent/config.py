@@ -12,7 +12,7 @@ class ZhitouAgentConfig(BaseConfig):
   dashscpope: DashsopeConfig
   bocha: BochaConfig
   logging: LoggingConfig
-  postgres: DatabaseConfig
+  database: DatabaseConfig
 
 class ZhitouAgentConfigLoader(ConfigLoader[ZhitouAgentConfig]):
   config_class = ZhitouAgentConfig

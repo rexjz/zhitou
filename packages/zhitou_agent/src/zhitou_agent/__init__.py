@@ -1,12 +1,10 @@
-import asyncio
-import agentscope
-from loguru import logger
-from zhitou_agent.agent.agent_scope import agentscope_agent_cli
-from zhitou_agent.agent.agno import run_ango_agent
-from zhitou_agent.agent.llamma_index import run_llamma_index_rect_agent
-import warnings
-
 from zhitou_agent.config import ZhitouAgentConfigLoader, config_logger
+from zhitou_agent.agent.agno import run_ango_agent
+from loguru import logger
+import agentscope
+import warnings
+import asyncio
+
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", message=".*PydanticDeprecatedSince20.*")
