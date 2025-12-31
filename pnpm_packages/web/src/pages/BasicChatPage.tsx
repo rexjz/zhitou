@@ -29,6 +29,7 @@ const BasicChatPage: React.FC = () => {
         WebSeachToolCallRenderer,
         ThinkToolCallRenderer
       ]}
+      useSingleEndpoint
       // renderToolCalls={}
     >
       <Chat />
