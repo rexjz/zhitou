@@ -13,9 +13,15 @@ import type {
 
 import useSwr from 'swr';
 import type {
+  Arguments,
   Key,
   SWRConfiguration
 } from 'swr';
+
+import useSWRMutation from 'swr/mutation';
+import type {
+  SWRMutationConfiguration
+} from 'swr/mutation';
 
 
 
@@ -90,6 +96,164 @@ export const useRootGet = <TError = AxiosError<unknown>>(
   const swrFn = () => rootGet(axiosOptions)
 
   const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
+
+  return {
+    swrKey,
+    ...query
+  }
+}
+/**
+ * @summary Test1
+ */
+export const test1AFakeJsonStreamerGet = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<unknown>> => {
+    return axios.get(
+      `/a_fake_json_streamer`,options
+    );
+  }
+
+
+
+export const getTest1AFakeJsonStreamerGetKey = () => [`/a_fake_json_streamer`] as const;
+
+export type Test1AFakeJsonStreamerGetQueryResult = NonNullable<Awaited<ReturnType<typeof test1AFakeJsonStreamerGet>>>
+export type Test1AFakeJsonStreamerGetQueryError = AxiosError<unknown>
+
+/**
+ * @summary Test1
+ */
+export const useTest1AFakeJsonStreamerGet = <TError = AxiosError<unknown>>(
+   options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof test1AFakeJsonStreamerGet>>, TError> & { swrKey?: Key, enabled?: boolean }, axios?: AxiosRequestConfig }
+) => {
+  const {swr: swrOptions, axios: axiosOptions} = options ?? {}
+
+  const isEnabled = swrOptions?.enabled !== false
+  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getTest1AFakeJsonStreamerGetKey() : null);
+  const swrFn = () => test1AFakeJsonStreamerGet(axiosOptions)
+
+  const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
+
+  return {
+    swrKey,
+    ...query
+  }
+}
+/**
+ * @summary Test2
+ */
+export const test2AFakeJsonStreamerPost = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<unknown>> => {
+    return axios.post(
+      `/a_fake_json_streamer`,undefined,options
+    );
+  }
+
+
+
+export const getTest2AFakeJsonStreamerPostMutationFetcher = ( options?: AxiosRequestConfig) => {
+  return (_: Key, __: { arg: Arguments }) => {
+    return test2AFakeJsonStreamerPost(options);
+  }
+}
+export const getTest2AFakeJsonStreamerPostMutationKey = () => [`/a_fake_json_streamer`] as const;
+
+export type Test2AFakeJsonStreamerPostMutationResult = NonNullable<Awaited<ReturnType<typeof test2AFakeJsonStreamerPost>>>
+export type Test2AFakeJsonStreamerPostMutationError = AxiosError<unknown>
+
+/**
+ * @summary Test2
+ */
+export const useTest2AFakeJsonStreamerPost = <TError = AxiosError<unknown>>(
+   options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof test2AFakeJsonStreamerPost>>, TError, Key, Arguments, Awaited<ReturnType<typeof test2AFakeJsonStreamerPost>>> & { swrKey?: string }, axios?: AxiosRequestConfig}
+) => {
+
+  const {swr: swrOptions, axios: axiosOptions} = options ?? {}
+
+  const swrKey = swrOptions?.swrKey ?? getTest2AFakeJsonStreamerPostMutationKey();
+  const swrFn = getTest2AFakeJsonStreamerPostMutationFetcher(axiosOptions);
+
+  const query = useSWRMutation(swrKey, swrFn, swrOptions)
+
+  return {
+    swrKey,
+    ...query
+  }
+}
+/**
+ * @summary Test3
+ */
+export const test3FakeJsonStreamerGet = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<unknown>> => {
+    return axios.get(
+      `/fake_json_streamer`,options
+    );
+  }
+
+
+
+export const getTest3FakeJsonStreamerGetKey = () => [`/fake_json_streamer`] as const;
+
+export type Test3FakeJsonStreamerGetQueryResult = NonNullable<Awaited<ReturnType<typeof test3FakeJsonStreamerGet>>>
+export type Test3FakeJsonStreamerGetQueryError = AxiosError<unknown>
+
+/**
+ * @summary Test3
+ */
+export const useTest3FakeJsonStreamerGet = <TError = AxiosError<unknown>>(
+   options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof test3FakeJsonStreamerGet>>, TError> & { swrKey?: Key, enabled?: boolean }, axios?: AxiosRequestConfig }
+) => {
+  const {swr: swrOptions, axios: axiosOptions} = options ?? {}
+
+  const isEnabled = swrOptions?.enabled !== false
+  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getTest3FakeJsonStreamerGetKey() : null);
+  const swrFn = () => test3FakeJsonStreamerGet(axiosOptions)
+
+  const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
+
+  return {
+    swrKey,
+    ...query
+  }
+}
+/**
+ * @summary Test4
+ */
+export const test4FakeJsonStreamerPost = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<unknown>> => {
+    return axios.post(
+      `/fake_json_streamer`,undefined,options
+    );
+  }
+
+
+
+export const getTest4FakeJsonStreamerPostMutationFetcher = ( options?: AxiosRequestConfig) => {
+  return (_: Key, __: { arg: Arguments }) => {
+    return test4FakeJsonStreamerPost(options);
+  }
+}
+export const getTest4FakeJsonStreamerPostMutationKey = () => [`/fake_json_streamer`] as const;
+
+export type Test4FakeJsonStreamerPostMutationResult = NonNullable<Awaited<ReturnType<typeof test4FakeJsonStreamerPost>>>
+export type Test4FakeJsonStreamerPostMutationError = AxiosError<unknown>
+
+/**
+ * @summary Test4
+ */
+export const useTest4FakeJsonStreamerPost = <TError = AxiosError<unknown>>(
+   options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof test4FakeJsonStreamerPost>>, TError, Key, Arguments, Awaited<ReturnType<typeof test4FakeJsonStreamerPost>>> & { swrKey?: string }, axios?: AxiosRequestConfig}
+) => {
+
+  const {swr: swrOptions, axios: axiosOptions} = options ?? {}
+
+  const swrKey = swrOptions?.swrKey ?? getTest4FakeJsonStreamerPostMutationKey();
+  const swrFn = getTest4FakeJsonStreamerPostMutationFetcher(axiosOptions);
+
+  const query = useSWRMutation(swrKey, swrFn, swrOptions)
 
   return {
     swrKey,

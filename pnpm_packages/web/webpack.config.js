@@ -57,6 +57,7 @@ module.exports = {
     historyApiFallback: true,
     port: 6009,
     open: true,
+    compress: false,
     proxy: [
       {
         context: ['/api', '/proxy'],
