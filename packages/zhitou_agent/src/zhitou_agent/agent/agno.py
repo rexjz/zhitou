@@ -37,7 +37,7 @@ async def run_ango_agent(config: ZhitouAgentConfig):
         break
 
       print("Agent: ", end="")
-      event_stream = agent.arun(user_input, stream=True, stream_events=True)
+      event_stream = agent.arun(user_input)
 
       async for event in event_stream:
         if event.event == RunEvent.run_content:
@@ -90,5 +90,6 @@ def create_agno_zhitou_agent(
     # reasoning_model=OpenAIChat(
     # ),
     stream=True,
+    stream_events=True
   )
   return agent

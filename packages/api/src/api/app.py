@@ -5,6 +5,7 @@ import pathlib
 from api.api_models.api_response import APIResponse
 from api.config import APIConfigLoader, APIConfig
 from contextlib import asynccontextmanager
+from api.middleware.request_state import RequestStateMiddleware
 from api.services.agent.agent_memory_service_fs_impl import AgentMemoryServiceFSImpl
 from core.config.models import LoggingConfig
 from core.db_manager import DatabaseManager
@@ -21,6 +22,7 @@ from api.handlers.agent import agent_app
 from typing import cast
 
 import uvicorn
+from zhitou_agent.ag_ui.agui_app import create_agui_agno_app
 
 from .state import (
   AgentService,
@@ -74,6 +76,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+# app2 = create_agui_agno_app(session_id="1234", user_id="system",lifespan=lifespan)
 
 
 @app.exception_handler(HTTPException)
@@ -102,17 +105,7 @@ app.include_router(auth_router, prefix="/api/auth")
 app.include_router(user_router, prefix="/api/user")
 app.include_router(agent_app, prefix="/api/agent")
 
-
-@app.middleware("http")
-async def add_request_state(request: Request, call_next):
-  app_state = cast(AppState, request.app.state.state)
-  request.state.r_state = RequestState(
-    db_session=app_state.db_manager.get_session(), request_id=str(uuid.uuid4())
-  )
-  response = await call_next(request)
-  response.headers["X-Request-ID"] = request.state.r_state.request_id
-  return response
-
+app.add_middleware(RequestStateMiddleware)
 
 @logger.catch()
 def main():
