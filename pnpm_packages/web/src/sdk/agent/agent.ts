@@ -24,8 +24,7 @@ import type {
 } from 'swr/mutation';
 
 import type {
-  HTTPValidationError,
-  RunAguiAgentParams
+  HTTPValidationError
 } from '.././models';
 
 
@@ -37,23 +36,21 @@ import type {
  * @summary Agui Proxy
  */
 export const runAguiAgent = (
-    params: RunAguiAgentParams, options?: AxiosRequestConfig
+     options?: AxiosRequestConfig
  ): Promise<AxiosResponse<unknown>> => {
     return axios.post(
-      `/api/agent/agui`,undefined,{
-    ...options,
-        params: {...params, ...options?.params},}
+      `/api/agent/agui`,undefined,options
     );
   }
 
 
 
-export const getRunAguiAgentMutationFetcher = (params: RunAguiAgentParams, options?: AxiosRequestConfig) => {
+export const getRunAguiAgentMutationFetcher = ( options?: AxiosRequestConfig) => {
   return (_: Key, __: { arg: Arguments }) => {
-    return runAguiAgent(params, options);
+    return runAguiAgent(options);
   }
 }
-export const getRunAguiAgentMutationKey = (params: RunAguiAgentParams,) => [`/api/agent/agui`, ...(params ? [params]: [])] as const;
+export const getRunAguiAgentMutationKey = () => [`/api/agent/agui`] as const;
 
 export type RunAguiAgentMutationResult = NonNullable<Awaited<ReturnType<typeof runAguiAgent>>>
 export type RunAguiAgentMutationError = AxiosError<HTTPValidationError>
@@ -62,13 +59,13 @@ export type RunAguiAgentMutationError = AxiosError<HTTPValidationError>
  * @summary Agui Proxy
  */
 export const useRunAguiAgent = <TError = AxiosError<HTTPValidationError>>(
-  params: RunAguiAgentParams, options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof runAguiAgent>>, TError, Key, Arguments, Awaited<ReturnType<typeof runAguiAgent>>> & { swrKey?: string }, axios?: AxiosRequestConfig}
+   options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof runAguiAgent>>, TError, Key, Arguments, Awaited<ReturnType<typeof runAguiAgent>>> & { swrKey?: string }, axios?: AxiosRequestConfig}
 ) => {
 
   const {swr: swrOptions, axios: axiosOptions} = options ?? {}
 
-  const swrKey = swrOptions?.swrKey ?? getRunAguiAgentMutationKey(params);
-  const swrFn = getRunAguiAgentMutationFetcher(params, axiosOptions);
+  const swrKey = swrOptions?.swrKey ?? getRunAguiAgentMutationKey();
+  const swrFn = getRunAguiAgentMutationFetcher(axiosOptions);
 
   const query = useSWRMutation(swrKey, swrFn, swrOptions)
 
@@ -108,48 +105,6 @@ export const useAguiStatus = <TError = AxiosError<HTTPValidationError>>(
   const swrFn = () => aguiStatus(axiosOptions)
 
   const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
-
-  return {
-    swrKey,
-    ...query
-  }
-}
-/**
- * @summary Proxy Mixed
- */
-export const proxyMixedApiAgentProxyCopilotkitPost = (
-     options?: AxiosRequestConfig
- ): Promise<AxiosResponse<unknown>> => {
-    return axios.post(
-      `/api/agent/proxy/copilotkit`,undefined,options
-    );
-  }
-
-
-
-export const getProxyMixedApiAgentProxyCopilotkitPostMutationFetcher = ( options?: AxiosRequestConfig) => {
-  return (_: Key, __: { arg: Arguments }) => {
-    return proxyMixedApiAgentProxyCopilotkitPost(options);
-  }
-}
-export const getProxyMixedApiAgentProxyCopilotkitPostMutationKey = () => [`/api/agent/proxy/copilotkit`] as const;
-
-export type ProxyMixedApiAgentProxyCopilotkitPostMutationResult = NonNullable<Awaited<ReturnType<typeof proxyMixedApiAgentProxyCopilotkitPost>>>
-export type ProxyMixedApiAgentProxyCopilotkitPostMutationError = AxiosError<unknown>
-
-/**
- * @summary Proxy Mixed
- */
-export const useProxyMixedApiAgentProxyCopilotkitPost = <TError = AxiosError<unknown>>(
-   options?: { swr?:SWRMutationConfiguration<Awaited<ReturnType<typeof proxyMixedApiAgentProxyCopilotkitPost>>, TError, Key, Arguments, Awaited<ReturnType<typeof proxyMixedApiAgentProxyCopilotkitPost>>> & { swrKey?: string }, axios?: AxiosRequestConfig}
-) => {
-
-  const {swr: swrOptions, axios: axiosOptions} = options ?? {}
-
-  const swrKey = swrOptions?.swrKey ?? getProxyMixedApiAgentProxyCopilotkitPostMutationKey();
-  const swrFn = getProxyMixedApiAgentProxyCopilotkitPostMutationFetcher(axiosOptions);
-
-  const query = useSWRMutation(swrKey, swrFn, swrOptions)
 
   return {
     swrKey,

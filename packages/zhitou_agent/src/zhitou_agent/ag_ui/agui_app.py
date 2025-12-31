@@ -15,7 +15,8 @@ def create_agui_agno_app(session_id, user_id):
     session_id=session_id,
     user_id=user_id,
     bocha=config.bocha,
-    dashscpope=config.dashscpope
+    dashscpope=config.dashscpope,
+    postgres=config.database
   )
   agui_interface = AGUI(agent=agent)
   agent_os = AgentOS(agents=[agent], interfaces=[agui_interface])
