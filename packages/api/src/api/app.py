@@ -1,13 +1,10 @@
 import os
-import sys
-import uuid
 import pathlib
 from api.api_models.api_response import APIResponse
 from api.config import APIConfigLoader, APIConfig
 from contextlib import asynccontextmanager
 from api.middleware.request_state import RequestStateMiddleware
-from api.services.agent.agent_memory_service_fs_impl import AgentMemoryServiceFSImpl
-from core.config.models import LoggingConfig
+from core.config.models import DatabaseConfig, LoggingConfig
 from core.db_manager import DatabaseManager
 from core.error.biz_error import BizError, BizErrorCode
 from core.repos.user_repo import UserRepositoryImpl
@@ -19,16 +16,14 @@ from api.handlers.auth import auth_router
 from api.handlers.user import user_router
 from api.handlers.system import system_router
 from api.handlers.agent import agent_app
-from typing import cast
 
 import uvicorn
-from zhitou_agent.ag_ui.agui_app import create_agui_agno_app
+from zhitou_agent.agent.agno import create_agent_db
+from zhitou_agent.memory.agent_repo import AgentRepositoryImpl
 
 from .state import (
-  AgentService,
   RepositoriesState,
   ServicesState,
-  RequestState,
   AppState,
 )
 import json
@@ -43,12 +38,13 @@ def _config_logger(config: LoggingConfig):
     format="{time} | {level} | {name}:{function}:{line} - {message}",
     serialize=True,
   )
-  # logger.add(sys.stdout, serialize=True)
-  # logger.add(sys.stderr, serialize=True)
 
 
-def init_repositories_state() -> RepositoriesState:
-  return RepositoriesState(user_repo=UserRepositoryImpl())
+def init_repositories_state(db_config: DatabaseConfig) -> RepositoriesState:
+  return RepositoriesState(
+    user_repo=UserRepositoryImpl(),
+    agent_repo=AgentRepositoryImpl(db=create_agent_db(db_config)),
+  )
 
 
 @asynccontextmanager
@@ -61,12 +57,9 @@ async def lifespan(app: FastAPI):
   db_manager = DatabaseManager()
   db_manager.init(config.database.url)
 
-  repositories = init_repositories_state()
+  repositories = init_repositories_state(db_config=config.database)
   services = ServicesState(
     user_service=UserServiceImpl(user_repo=repositories.user_repo),
-    agent_service=AgentService(
-      memory=AgentMemoryServiceFSImpl(base_dir=config.agent.memory_base_dir)
-    ),
   )
   app.state.state = AppState(
     config=config, db_manager=db_manager, repositories=repositories, services=services
@@ -106,6 +99,7 @@ app.include_router(user_router, prefix="/api/user")
 app.include_router(agent_app, prefix="/api/agent")
 
 app.add_middleware(RequestStateMiddleware)
+
 
 @logger.catch()
 def main():

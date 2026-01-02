@@ -1,7 +1,6 @@
 # state.py
 from dataclasses import dataclass
 from typing import cast, Optional
-from api.services.agent.agent_memory_service import AgentMemoryService
 from core.db_manager import DatabaseManager
 from core.repos.user_repo import UserRepository
 from core.models.user import UserModel
@@ -9,20 +8,17 @@ from api.services.user import UserService
 from fastapi import Request
 from sqlalchemy.orm import Session
 from api.config import APIConfig
+from zhitou_agent.memory.agent_repo import AgentRepository
 
 @dataclass
 class RepositoriesState:
   user_repo: UserRepository
+  agent_repo: AgentRepository
 
-
-@dataclass
-class AgentService:
-  memory: AgentMemoryService
 
 @dataclass
 class ServicesState:
   user_service: UserService
-  agent_service: AgentService
 
 
 @dataclass

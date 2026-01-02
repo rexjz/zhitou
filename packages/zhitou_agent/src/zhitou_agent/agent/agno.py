@@ -1,7 +1,5 @@
 from typing import Optional
 from agno.agent import Agent
-from agno.models.openai.like import OpenAILike
-from agno.models.openai.chat import OpenAIChat
 from core.config.models import BochaConfig, DashsopeConfig, DatabaseConfig
 from zhitou_agent.config import ZhitouAgentConfig
 from zhitou_agent.tools.bocha_web_search import BoChaTools
@@ -9,7 +7,6 @@ from zhitou_agent.prompt.system import system_prompt
 from agno.models.dashscope import DashScope
 from agno.tools.reasoning import ReasoningTools
 
-from agno.db.sqlite import SqliteDb
 from agno.db.postgres import PostgresDb
 from agno.agent import RunEvent
 
@@ -59,6 +56,10 @@ async def run_ango_agent(config: ZhitouAgentConfig):
       print("Continuing...")
 
 
+def create_agent_db(db: DatabaseConfig, schema="agno"):
+  return PostgresDb(db.url, db_schema=schema)
+
+
 def create_agno_zhitou_agent(
   bocha: BochaConfig,
   dashscpope: DashsopeConfig,
@@ -78,7 +79,7 @@ def create_agno_zhitou_agent(
     tools=[bocha_tools.web_search, ReasoningTools(add_instructions=True)],
     instructions=system_prompt,
     max_tool_calls_from_history=3,
-    db=PostgresDb(postgres.url, db_schema="agno"),
+    db=create_agent_db(postgres),
     num_history_runs=15,
     add_history_to_context=True,
     add_datetime_to_context=True,
@@ -90,6 +91,6 @@ def create_agno_zhitou_agent(
     # reasoning_model=OpenAIChat(
     # ),
     stream=True,
-    stream_events=True
+    stream_events=True,
   )
   return agent
