@@ -1,4 +1,3 @@
-from agno.os import AgentOS
 from agno.os.interfaces.agui import AGUI
 from fastapi import FastAPI
 from zhitou_agent.agent.agno import create_agno_zhitou_agent

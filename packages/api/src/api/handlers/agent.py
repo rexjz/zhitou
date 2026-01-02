@@ -1,14 +1,13 @@
-from typing import Annotated
+from typing import Annotated, Literal
+from api.state import AppState, RequestState, get_app_state_dep, get_request_state_dep
 from core.models.user import UserModel
 from fastapi import APIRouter, Depends, HTTPException, Header, Request, Response, status
 from api.middleware import get_current_user
 from zhitou_agent.ag_ui.agui_app import create_agui_agno_app
-from loguru import logger
-from starlette.responses import Response
 from starlette.types import Scope, Receive, Send
 
 # agent_app = APIRouter(dependencies=[Depends(get_current_user)], tags=["Agent"])
-agent_app = APIRouter( tags=["Agent"])
+agent_app = APIRouter(tags=["Agent"])
 
 
 class ASGIProxyResponse(Response):
@@ -82,3 +81,26 @@ async def status_proxy(
     status_code=response_start["status"],
     headers=headers,
   )
+
+
+@agent_app.get("/sessions", operation_id="get user sessions")
+async def get_user_sessions(
+  current_user: UserModel = Depends(get_current_user),
+  app_state: AppState = Depends(get_app_state_dep),
+  # request_state: RequestState = Depends(get_request_state_dep),
+  page_size: int = 10,
+  page_number: int = 1,
+  sort_order: Literal["desc", "asc"] = "desc",
+):
+  sessions, total = app_state.repositories.agent_repo.get_sessions(
+    user_id=str(current_user.id),
+    page_size=page_size,
+    page_number=page_number,
+    sort_order=sort_order,
+  )
+  return {
+    "sessions": sessions,
+    "total": total,
+    "page_size": page_size,
+    "page_number": page_number,
+  }
