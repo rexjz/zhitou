@@ -27,6 +27,7 @@ class AgentRepositoryImpl(AgentRepository):
     page_number: int,
     sort_order: Literal["desc", "asc"] = "desc",
   ):
+    
     return self.db.get_sessions(
       user_id=user_id,
       page=page_number,
