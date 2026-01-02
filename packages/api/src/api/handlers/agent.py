@@ -1,8 +1,9 @@
-from typing import Annotated, Literal
+from typing import Annotated, Literal, Optional
 from api.state import AppState, RequestState, get_app_state_dep, get_request_state_dep
 from core.models.user import UserModel
 from fastapi import APIRouter, Depends, HTTPException, Header, Request, Response, status
 from api.middleware import get_current_user
+from pydantic import BaseModel
 from zhitou_agent.ag_ui.agui_app import create_agui_agno_app
 from starlette.types import Scope, Receive, Send
 
@@ -83,14 +84,14 @@ async def status_proxy(
   )
 
 
-@agent_app.get("/sessions", operation_id="get user sessions")
-async def get_user_sessions(
+@agent_app.get("/sessions", operation_id="get current user sessions")
+async def get_current_user_sessions(
   current_user: UserModel = Depends(get_current_user),
   app_state: AppState = Depends(get_app_state_dep),
   # request_state: RequestState = Depends(get_request_state_dep),
-  page_size: int = 10,
-  page_number: int = 1,
-  sort_order: Literal["desc", "asc"] = "desc",
+  page_size: Optional[int] = 10,
+  page_number: Optional[int] = 1,
+  sort_order: Optional[Literal["desc", "asc"]] = "desc",
 ):
   sessions, total = app_state.repositories.agent_repo.get_sessions(
     user_id=str(current_user.id),
@@ -98,9 +99,21 @@ async def get_user_sessions(
     page_number=page_number,
     sort_order=sort_order,
   )
+
+  for session in sessions:
+    session.pop("runs", None)
+    session.pop("session_data", None)
+
   return {
     "sessions": sessions,
     "total": total,
     "page_size": page_size,
     "page_number": page_number,
   }
+
+# class AgentSessionData(BaseModel):
+#   title: str
+#   messages: 
+
+# @agent_app.get("/session/{session_id}", operation_id="get current session detail")
+# async def get_current_user_sessions(
