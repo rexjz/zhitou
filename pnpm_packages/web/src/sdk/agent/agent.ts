@@ -25,6 +25,7 @@ import type {
 
 import type {
   GetCurrentUserSessionsParams,
+  GetSessionMessagesParams,
   HTTPValidationError
 } from '.././models';
 
@@ -143,6 +144,49 @@ export const useGetCurrentUserSessions = <TError = AxiosError<HTTPValidationErro
   const isEnabled = swrOptions?.enabled !== false
   const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getGetCurrentUserSessionsKey(params) : null);
   const swrFn = () => getCurrentUserSessions(params, axiosOptions)
+
+  const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
+
+  return {
+    swrKey,
+    ...query
+  }
+}
+/**
+ * Get history messages of a specific session.
+ * @summary Get Session Messages
+ */
+export const getSessionMessages = (
+    sessionId: string,
+    params?: GetSessionMessagesParams, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<unknown>> => {
+    return axios.get(
+      `/api/agent/sessions/${sessionId}/messages`,{
+    ...options,
+        params: {...params, ...options?.params},}
+    );
+  }
+
+
+
+export const getGetSessionMessagesKey = (sessionId: string,
+    params?: GetSessionMessagesParams,) => [`/api/agent/sessions/${sessionId}/messages`, ...(params ? [params]: [])] as const;
+
+export type GetSessionMessagesQueryResult = NonNullable<Awaited<ReturnType<typeof getSessionMessages>>>
+export type GetSessionMessagesQueryError = AxiosError<HTTPValidationError>
+
+/**
+ * @summary Get Session Messages
+ */
+export const useGetSessionMessages = <TError = AxiosError<HTTPValidationError>>(
+  sessionId: string,
+    params?: GetSessionMessagesParams, options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof getSessionMessages>>, TError> & { swrKey?: Key, enabled?: boolean }, axios?: AxiosRequestConfig }
+) => {
+  const {swr: swrOptions, axios: axiosOptions} = options ?? {}
+
+  const isEnabled = swrOptions?.enabled !== false && !!(sessionId)
+  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getGetSessionMessagesKey(sessionId,params) : null);
+  const swrFn = () => getSessionMessages(sessionId,params, axiosOptions)
 
   const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
 

@@ -59,13 +59,32 @@ async def run_ango_agent(config: ZhitouAgentConfig):
 def create_agent_db(db: DatabaseConfig, schema="agno"):
   return PostgresDb(db.url, db_schema=schema)
 
+
 # class Session
+
 
 def get_session_chat_history(
   session_id: str, db_config: DatabaseConfig, last_n_runs: int = 10
 ):
   agent = Agent(db=create_agent_db(db_config))
   return agent.get_session_messages(session_id=session_id, last_n_runs=last_n_runs)
+
+
+def create_plain_agno_zhitou_agent(
+  postgres: DatabaseConfig,
+):
+  return Agent(
+    name="zhitou_agent",
+    max_tool_calls_from_history=3,
+    db=create_agent_db(postgres),
+    num_history_runs=15,
+    add_history_to_context=True,
+    add_datetime_to_context=True,
+    timezone_identifier="Asia/Shanghai",
+    markdown=True,
+    stream=True,
+    stream_events=True,
+  )
 
 
 def create_agno_zhitou_agent(
