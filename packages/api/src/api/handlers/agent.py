@@ -6,6 +6,8 @@ from api.middleware import get_current_user
 from pydantic import BaseModel
 from zhitou_agent.ag_ui.agui_app import create_agui_agno_app
 from starlette.types import Scope, Receive, Send
+from zhitou_agent.agent.agno import create_agno_zhitou_agent
+from zhitou_agent.utils.agno_2_copilotkit import convert_agno_to_copilotkit
 
 # agent_app = APIRouter(dependencies=[Depends(get_current_user)], tags=["Agent"])
 agent_app = APIRouter(tags=["Agent"])
@@ -112,10 +114,13 @@ async def get_current_user_sessions(
   }
 
 
-
-# class AgentSessionData(BaseModel):
-#   title: str
-#   messages: 
-
-# @agent_app.get("/session/{session_id}", operation_id="get current session detail")
-# async def get_current_user_sessions(
+@agent_app.get("/sessions/{session_id}/messages", operation_id="get session messages")
+async def get_session_messages(
+  session_id: str,
+  current_user: UserModel = Depends(get_current_user),
+  last_runs: Optional[int] = 5,
+):
+  """Get history messages of a specific session."""
+  agent = create_agno_zhitou_agent(session_id=session_id, user_id=str(current_user.id))
+  messages = agent.get_session_messages(session_id=session_id, last_n_runs=last_runs)
+  return convert_agno_to_copilotkit(messages)

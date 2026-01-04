@@ -21,6 +21,9 @@ run = "pnpm --filter web gen && pnpm --filter web dev"
 [tasks.agent-cli]
 run = "uv run --package zhitou_agent zhitou-agent-cli"
 
+[tasks.agent-history-test]
+run = "uv run --package zhitou_agent zhitou-agent-history"
+
 [tasks.dev-api]
 run = [
   "uv run api-dev &",

@@ -20,6 +20,7 @@ dependencies = [
 [project.scripts]
 zhitou_agent = "zhitou_agent:main"
 zhitou-agent-cli = "zhitou_agent:cli"
+zhitou-agent-history = "zhitou_agent:test_get_history"
 
 [build-system]
 requires = ["hatchling"]
