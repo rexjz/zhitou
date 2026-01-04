@@ -24,6 +24,7 @@ import type {
 } from 'swr/mutation';
 
 import type {
+  GetCurrentUserSessionsParams,
   HTTPValidationError
 } from '.././models';
 
@@ -103,6 +104,45 @@ export const useAguiStatus = <TError = AxiosError<HTTPValidationError>>(
   const isEnabled = swrOptions?.enabled !== false
   const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getAguiStatusKey() : null);
   const swrFn = () => aguiStatus(axiosOptions)
+
+  const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
+
+  return {
+    swrKey,
+    ...query
+  }
+}
+/**
+ * @summary Get Current User Sessions
+ */
+export const getCurrentUserSessions = (
+    params?: GetCurrentUserSessionsParams, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<unknown>> => {
+    return axios.get(
+      `/api/agent/sessions`,{
+    ...options,
+        params: {...params, ...options?.params},}
+    );
+  }
+
+
+
+export const getGetCurrentUserSessionsKey = (params?: GetCurrentUserSessionsParams,) => [`/api/agent/sessions`, ...(params ? [params]: [])] as const;
+
+export type GetCurrentUserSessionsQueryResult = NonNullable<Awaited<ReturnType<typeof getCurrentUserSessions>>>
+export type GetCurrentUserSessionsQueryError = AxiosError<HTTPValidationError>
+
+/**
+ * @summary Get Current User Sessions
+ */
+export const useGetCurrentUserSessions = <TError = AxiosError<HTTPValidationError>>(
+  params?: GetCurrentUserSessionsParams, options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof getCurrentUserSessions>>, TError> & { swrKey?: Key, enabled?: boolean }, axios?: AxiosRequestConfig }
+) => {
+  const {swr: swrOptions, axios: axiosOptions} = options ?? {}
+
+  const isEnabled = swrOptions?.enabled !== false
+  const swrKey = swrOptions?.swrKey ?? (() => isEnabled ? getGetCurrentUserSessionsKey(params) : null);
+  const swrFn = () => getCurrentUserSessions(params, axiosOptions)
 
   const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(swrKey, swrFn, swrOptions)
 
