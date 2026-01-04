@@ -126,5 +126,8 @@ async def get_session_messages(
 ):
   """Get history messages of a specific session."""
   agent = create_plain_agno_zhitou_agent(app_state.config.database)
-  messages = agent.get_session_messages(session_id=session_id, last_n_runs=last_runs)
-  return convert_agno_to_copilotkit([m.model_dump()  for m in messages ])
+  session = agent.get_session(session_id=session_id)
+  if session is None:
+    return []
+  messages = agent.get_session_messages(session_id=session_id, last_n_runs=last_runs, skip_history_messages=True)
+  return convert_agno_to_copilotkit([m.model_dump() for m in messages ])

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 
 import { CopilotKit } from "@copilotkit/react-core";
 
@@ -17,10 +17,11 @@ const generateSessionId = () => {
 const BasicChatPage: React.FC = () => {
   const sessionId = useMemo(() => {
     const params = new URLSearchParams(window.location.search);
+    console.log("sessionId useMemo", params)
     const sessionFromUrl = params.get("sessionId");
     return sessionFromUrl || generateSessionId();
   }, []);
-
+  console.log(sessionId)
   return (
     <CopilotKit
       runtimeUrl="/proxy/copilotkit"
@@ -36,32 +37,26 @@ const BasicChatPage: React.FC = () => {
       key={sessionId}
       threadId={sessionId}
     >
-      <Chat />
+      <Chat sessionId={sessionId} />
     </CopilotKit>
   );
 };
 
-const Chat = () => {
-  // const { messages, setMessages } = useCopilotMessagesContext()
-  // console.log(messages)
-  // useEffect(() => {
-  //   if (messages.length !== 0) {
-  //     localStorage.setItem("copilotkit-messages", JSON.stringify(messages));
-  //   }
-  // }, [JSON.stringify(messages)]);
+const Chat = ({ sessionId }: { sessionId: string }) => {
 
   const { agent } = useAgent({ agentId: "default" });
-  const { state, setState, messages } = agent;
 
-  const { data, isLoading } = useGetSessionMessages(agent.threadId)
+  const { data, isLoading } = useGetSessionMessages(sessionId)
+  const hasLoadedHistory = useRef(false);
 
   useEffect(() => {
-    if (!agent.isRunning && !isLoading && data) {
+    if (!agent.isRunning && !isLoading && data && !hasLoadedHistory.current) {
+      console.log(data.data)
       agent.setMessages(data?.data as any)
+      hasLoadedHistory.current = true;
     }
   }, [agent, agent.isRunning, isLoading, data]);
 
-  console.log(messages)
 
   return (
     <div className="h-[calc(100vh-152px)] w-full rounded-lg">

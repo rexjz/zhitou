@@ -19,7 +19,7 @@ class DynamicHeaderAgent extends HttpAgent {
 
     delete input.forwardedProps?.forwardedHeaders
     const init = super.requestInit(input);
- 
+
     const request: any = {
       ...init,
       headers: {
@@ -49,23 +49,10 @@ const serviceAdapter = new ExperimentalEmptyAdapter();
 app.post(
   "/copilotkit",
   (req: any, res, next) => {
-    console.log("req.headers: ", req.headers)
-    // // 关键：告诉任何中间层别对内容做 transform（包括压缩/转码）
-    // res.setHeader("Cache-Control", "no-cache, no-transform");
-    // res.setHeader("Content-Type", "text/event-stream; charset=utf-8");
-    // res.setHeader("Connection", "keep-alive");
-    // res.setHeader("Content-Encoding", "");
-    // res.setHeader("X-Accel-Buffering", "no");
-
-    // // 有些代理/中间件会参考它；有也不吃亏
-    // res.removeHeader("Content-Encoding");
-
-    // res.flushHeaders?.();
-
-    if(req.body.body) {
+    if (req.body.body) {
 
       const forwardedHeaders: any = {
-        Cookie: req.headers.cookie // 如果你永远要加 Cookie
+        Cookie: req.headers.cookie
       };
 
       if (req.headers['x-agent-session-id']) {
@@ -76,7 +63,15 @@ app.post(
         ...req.body.body.forwardedProps,
         forwardedHeaders: forwardedHeaders,
       };
-    } 
+    }
+
+
+
+    // copilitkit 总是会发送全量messages，这里是一个workaround
+    if (req.body?.method === "agent/run" && Array.isArray(req.body.body.messages) && req.body.body.messages.length > 1) {
+      req.body.body.messages = [req.body.body.messages[req.body.body.messages.length - 1]];
+    }
+
     next();
   },
   copilotRuntimeNodeExpressEndpoint({
