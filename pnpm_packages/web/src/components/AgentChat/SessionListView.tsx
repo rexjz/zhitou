@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { List, Skeleton, Typography, Space, Tag } from 'antd';
 import { useGetCurrentUserSessions as useGetCurrentUserAgentChatSessions } from "@/sdk/agent/agent";
 import type { SessionData } from "@/sdk/models/sessionData";
@@ -13,9 +13,10 @@ interface SessionItemProps extends SessionData {
 
 interface SessionListViewProps {
   onSessionClick?: (session: SessionData, index: number) => void;
+  activatedSessionId?: string | null;
 }
 
-function SessionListView({ onSessionClick }: SessionListViewProps) {
+function SessionListView({ onSessionClick, activatedSessionId }: SessionListViewProps) {
   const [page, setPage] = useState(1);
   const [allSessions, setAllSessions] = useState<SessionData[]>([]);
   const [hasMore, setHasMore] = useState(true);
@@ -83,7 +84,7 @@ function SessionListView({ onSessionClick }: SessionListViewProps) {
 
   // Prepare list data with loading placeholders
   const listData: SessionItemProps[] = isLoading && page === 1
-    ? Array.from({ length: PAGE_SIZE }).map((_, index) => ({
+    ? Array.from({ length: PAGE_SIZE }).map(() => ({
         loading: true,
       } as SessionItemProps))
     : allSessions;
@@ -98,26 +99,33 @@ function SessionListView({ onSessionClick }: SessionListViewProps) {
         itemLayout="horizontal"
         dataSource={listData}
         loading={isLoading && page === 1}
-        renderItem={(item, index) => (
-          <List.Item
-            onClick={() => {
-              if (!item.loading && onSessionClick) {
-                onSessionClick(item as SessionData, index);
-              }
-            }}
-            style={{
-              cursor: item.loading ? 'default' : 'pointer',
-              transition: 'background-color 0.2s'
-            }}
-            onMouseEnter={(e) => {
-              if (!item.loading) {
-                e.currentTarget.style.backgroundColor = '#f5f5f5';
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
-            }}
-          >
+        renderItem={(item, index) => {
+          const isActivated = !item.loading && item.session_id === activatedSessionId;
+          return (
+            <List.Item
+              onClick={() => {
+                if (!item.loading && onSessionClick) {
+                  onSessionClick(item as SessionData, index);
+                }
+              }}
+              style={{
+                cursor: item.loading ? 'default' : 'pointer',
+                transition: 'background-color 0.2s, border-color 0.2s',
+                backgroundColor: isActivated ? '#e6f4ff' : 'transparent',
+                borderLeft: isActivated ? '4px solid #1890ff' : '4px solid transparent',
+                paddingLeft: isActivated ? '12px' : '16px'
+              }}
+              onMouseEnter={(e) => {
+                if (!item.loading && !isActivated) {
+                  e.currentTarget.style.backgroundColor = '#f5f5f5';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isActivated) {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }
+              }}
+            >
             <Skeleton loading={item.loading} active avatar>
               <List.Item.Meta
                 title={
@@ -128,17 +136,17 @@ function SessionListView({ onSessionClick }: SessionListViewProps) {
                 }
                 description={
                   <Space direction="vertical" size="small">
-                    <Text type="secondary">Session ID: {item.session_id}</Text>
                     {item.summary && <Text>{item.summary}</Text>}
-                    <Text type="secondary" style={{ fontSize: '12px' }}>
-                      Created: {formatDate(item.created_at)} | Updated: {formatDate(item.updated_at)}
+                    <Text type="secondary">
+                      创建于: {formatDate(item.created_at)} 
                     </Text>
                   </Space>
                 }
               />
             </Skeleton>
           </List.Item>
-        )}
+          );
+        }}
       />
 
       {/* Loading indicator for infinite scroll */}

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { CopilotKit } from "@copilotkit/react-core";
 
@@ -6,39 +6,77 @@ import { WebSeachToolCallRenderer } from "@/components/ToolCall/web_search";
 import { ThinkToolCallRenderer } from "@/components/ToolCall/think";
 import { CopilotChat } from "@copilotkit/react-ui";
 import "@copilotkit/react-ui/styles.css";
-import { Message, useAgent } from "@copilotkitnext/react";
+import { useAgent } from "@copilotkitnext/react";
 // import { ActionExecutionMessage, ResultMessage, TextMessage } from "@copilotkit/runtime-client-gql";
-import { useGetSessionMessages } from "@/sdk/agent/agent"
+import { useGetSessionMessages } from "@/sdk/agent/agent";
+import SessionListView from "@/components/AgentChat/SessionListView";
+import type { SessionData } from "@/sdk/models/sessionData";
 
 const generateSessionId = () => {
   return `session_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
 };
 
 const BasicChatPage: React.FC = () => {
-  const sessionId = useMemo(() => {
+  const [currentSessionId, setCurrentSessionId] = useState<string>(() => {
     const params = new URLSearchParams(window.location.search);
-    console.log("sessionId useMemo", params)
     const sessionFromUrl = params.get("sessionId");
     return sessionFromUrl || generateSessionId();
-  }, []);
-  console.log(sessionId)
+  });
+
+  const handleSessionClick = (session: SessionData) => {
+    setCurrentSessionId(session.session_id);
+    // Update URL without page reload
+    const url = new URL(window.location.href);
+    url.searchParams.set("sessionId", session.session_id);
+    window.history.pushState({}, "", url.toString());
+  };
+
   return (
-    <CopilotKit
-      runtimeUrl="/proxy/copilotkit"
-      showDevConsole
-      agent="default"
-      headers={{
-        "X-Agent-Session-ID": sessionId
-      }}
-      renderToolCalls={[
-        WebSeachToolCallRenderer,
-        ThinkToolCallRenderer
-      ]}
-      key={sessionId}
-      threadId={sessionId}
-    >
-      <Chat sessionId={sessionId} />
-    </CopilotKit>
+    <div className="h-[calc(100vh-152px)] flex">
+      {/* Session List Sidebar */}
+      <div style={{
+        width: "320px",
+        borderRight: "1px solid #f0f0f0",
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column"
+      }}>
+        <div style={{
+          padding: "16px",
+          borderBottom: "1px solid #f0f0f0",
+          fontWeight: "bold",
+          fontSize: "16px"
+        }}>
+          历史会话
+        </div>
+        <div style={{ flex: 1, overflow: "hidden" }}>
+          <SessionListView
+            activatedSessionId={currentSessionId}
+            onSessionClick={handleSessionClick}
+          />
+        </div>
+      </div>
+
+      {/* Chat Area */}
+      <div style={{ flex: 1, overflow: "hidden" }}>
+        <CopilotKit
+          runtimeUrl="/proxy/copilotkit"
+          showDevConsole
+          agent="default"
+          headers={{
+            "X-Agent-Session-ID": currentSessionId
+          }}
+          renderToolCalls={[
+            WebSeachToolCallRenderer,
+            ThinkToolCallRenderer
+          ]}
+          key={currentSessionId}
+          threadId={currentSessionId}
+        >
+          <Chat sessionId={currentSessionId} />
+        </CopilotKit>
+      </div>
+    </div>
   );
 };
 
