@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { List, Skeleton, Typography, Space, Tag } from 'antd';
+import { List, Skeleton, Typography, Space, Tag, Button } from 'antd';
+import { ReloadOutlined } from '@ant-design/icons';
 import { useGetCurrentUserSessions as useGetCurrentUserAgentChatSessions } from "@/sdk/agent/agent";
 import type { SessionData } from "@/sdk/models/sessionData";
 
@@ -20,11 +21,12 @@ function SessionListView({ onSessionClick, activatedSessionId }: SessionListView
   const [page, setPage] = useState(1);
   const [allSessions, setAllSessions] = useState<SessionData[]>([]);
   const [hasMore, setHasMore] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   // Fetch data with current page
-  const { data, isLoading, error } = useGetCurrentUserAgentChatSessions({
+  const { data, isLoading, error, mutate } = useGetCurrentUserAgentChatSessions({
     page_size: PAGE_SIZE,
     page_number: page,
     sort_order: 'desc'
@@ -82,6 +84,19 @@ function SessionListView({ onSessionClick, activatedSessionId }: SessionListView
     return date.toLocaleString();
   };
 
+  // Refresh sessions
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    setAllSessions([]);
+    setPage(1);
+    setHasMore(true);
+    try {
+      await mutate();
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   // Prepare list data with loading placeholders
   const listData: SessionItemProps[] = isLoading && page === 1
     ? Array.from({ length: PAGE_SIZE }).map(() => ({
@@ -94,8 +109,28 @@ function SessionListView({ onSessionClick, activatedSessionId }: SessionListView
   }
 
   return (
-    <div style={{ height: '100%', overflow: 'auto' }}>
-      <List
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      {/* Toolbar with refresh button */}
+      <div style={{
+        padding: '12px 16px',
+        borderBottom: '1px solid #f0f0f0',
+        display: 'flex',
+        justifyContent: 'flex-end'
+      }}>
+        <Button
+          type="text"
+          icon={<ReloadOutlined />}
+          onClick={handleRefresh}
+          loading={isRefreshing}
+          size="small"
+        >
+          刷新
+        </Button>
+      </div>
+
+      {/* Sessions list */}
+      <div style={{ flex: 1, overflow: 'auto' }}>
+        <List
         itemLayout="horizontal"
         dataSource={listData}
         loading={isLoading && page === 1}
@@ -163,11 +198,12 @@ function SessionListView({ onSessionClick, activatedSessionId }: SessionListView
         </div>
       )}
 
-      {!hasMore && allSessions.length > 0 && (
-        <div style={{ textAlign: 'center', padding: '20px', color: '#999' }}>
-          No more sessions to load
-        </div>
-      )}
+        {!hasMore && allSessions.length > 0 && (
+          <div style={{ textAlign: 'center', padding: '20px', color: '#999' }}>
+            No more sessions to load
+          </div>
+        )}
+      </div>
     </div>
   );
 }

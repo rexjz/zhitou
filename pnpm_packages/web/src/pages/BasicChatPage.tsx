@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
+import { Button } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
 
 import { CopilotKit } from "@copilotkit/react-core";
 
@@ -31,6 +33,15 @@ const BasicChatPage: React.FC = () => {
     window.history.pushState({}, "", url.toString());
   };
 
+  const handleNewSession = () => {
+    const newSessionId = generateSessionId();
+    setCurrentSessionId(newSessionId);
+    // Update URL without page reload
+    const url = new URL(window.location.href);
+    url.searchParams.set("sessionId", newSessionId);
+    window.history.pushState({}, "", url.toString());
+  };
+
   return (
     <div className="h-[calc(100vh-152px)] flex">
       {/* Session List Sidebar */}
@@ -44,10 +55,21 @@ const BasicChatPage: React.FC = () => {
         <div style={{
           padding: "16px",
           borderBottom: "1px solid #f0f0f0",
-          fontWeight: "bold",
-          fontSize: "16px"
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center"
         }}>
-          历史会话
+          <span style={{ fontWeight: "bold", fontSize: "16px" }}>
+            历史会话
+          </span>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={handleNewSession}
+            size="small"
+          >
+            新会话
+          </Button>
         </div>
         <div style={{ flex: 1, overflow: "hidden" }}>
           <SessionListView
