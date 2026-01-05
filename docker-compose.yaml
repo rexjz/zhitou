@@ -1,7 +1,7 @@
 name: zhitou
 
-include:
-  - docker/ragflow/ragflow-docker-compose.yaml
+#include:
+#  - docker/ragflow/ragflow-docker-compose.yaml
 
 services:
   postgres:
