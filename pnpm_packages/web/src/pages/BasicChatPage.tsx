@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Button } from "antd";
+import { Button, Spin } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 
 import { CopilotKit } from "@copilotkit/react-core";
@@ -95,7 +95,7 @@ const BasicChatPage: React.FC = () => {
           key={currentSessionId}
           threadId={currentSessionId}
         >
-          <Chat sessionId={currentSessionId} />
+          <Chat key={currentSessionId} sessionId={currentSessionId} />
         </CopilotKit>
       </div>
     </div>
@@ -119,13 +119,30 @@ const Chat = ({ sessionId }: { sessionId: string }) => {
 
 
   return (
-    <div className="h-[calc(100vh-152px)] w-full rounded-lg">
+    <div className="h-[calc(100vh-152px)] w-full rounded-lg" style={{ position: 'relative' }}>
       <CopilotChat
         className="h-full w-full rounded-lg"
-        labels={{ initial: "你好，我有什么能帮你的？", placeholder: "在这里输入" }}
+        labels={{ initial: "", placeholder: "在这里输入" }}
         suggestions="auto"
         hideStopButton
       />
+      {isLoading && (
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(255, 255, 255, 0.8)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          pointerEvents: 'all'
+        }}>
+          <Spin size="large" tip="加载会话消息中..." />
+        </div>
+      )}
     </div>
   );
 };
