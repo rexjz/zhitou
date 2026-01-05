@@ -24,6 +24,7 @@ import type {
 } from 'swr/mutation';
 
 import type {
+  APIResponseGetSessionsResponse,
   GetCurrentUserSessionsParams,
   GetSessionMessagesParams,
   HTTPValidationError
@@ -118,7 +119,7 @@ export const useAguiStatus = <TError = AxiosError<HTTPValidationError>>(
  */
 export const getCurrentUserSessions = (
     params?: GetCurrentUserSessionsParams, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<unknown>> => {
+ ): Promise<AxiosResponse<APIResponseGetSessionsResponse>> => {
     return axios.get(
       `/api/agent/sessions`,{
     ...options,

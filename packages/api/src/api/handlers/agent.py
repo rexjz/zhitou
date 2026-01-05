@@ -1,15 +1,14 @@
-from typing import Annotated, Literal, Optional
-from api.state import AppState, RequestState, get_app_state_dep, get_request_state_dep
+from typing import Annotated, List, Literal, Optional
+from api.api_models.api_response import APIResponse
+from api.state import AppState, get_app_state_dep
 from core.models.user import UserModel
 from fastapi import APIRouter, Depends, HTTPException, Header, Request, Response, status
 from api.middleware import get_current_user
 from pydantic import BaseModel
 from zhitou_agent.ag_ui.agui_app import create_agui_agno_app
+from zhitou_agent.memory.agent_repo import SessionData
 from starlette.types import Scope, Receive, Send
-from zhitou_agent.agent.agno import (
-  create_agno_zhitou_agent,
-  create_plain_agno_zhitou_agent,
-)
+from zhitou_agent.agent.agno import create_plain_agno_zhitou_agent
 from zhitou_agent.utils.agno_2_copilotkit import convert_agno_to_copilotkit
 
 # agent_app = APIRouter(dependencies=[Depends(get_current_user)], tags=["Agent"])
@@ -26,6 +25,13 @@ class ASGIProxyResponse(Response):
   async def __call__(self, scope: Scope, receive: Receive, send: Send):
     # 关键：不要拦截/拼接 body，直接让下游 app 用同一个 send
     await self._app(self._scope, self._receive, send)
+
+
+class GetSessionsResponse(BaseModel):
+  sessions: List[SessionData]
+  total: int
+  page_size: int
+  page_number: int
 
 
 @agent_app.post("/agui", operation_id="run agui agent")
@@ -97,7 +103,7 @@ async def get_current_user_sessions(
   page_size: Optional[int] = 10,
   page_number: Optional[int] = 1,
   sort_order: Optional[Literal["desc", "asc"]] = "desc",
-):
+) -> APIResponse[GetSessionsResponse]:
   sessions, total = app_state.repositories.agent_repo.get_sessions(
     user_id=str(current_user.id),
     page_size=page_size,
@@ -109,12 +115,11 @@ async def get_current_user_sessions(
     session.pop("runs", None)
     session.pop("session_data", None)
 
-  return {
-    "sessions": sessions,
-    "total": total,
-    "page_size": page_size,
-    "page_number": page_number,
-  }
+  return APIResponse[GetSessionsResponse](
+    data=GetSessionsResponse(
+      sessions=sessions, total=total, page_number=page_number, page_size=page_size
+    )
+  )
 
 
 @agent_app.get("/sessions/{session_id}/messages", operation_id="get session messages")
@@ -129,5 +134,8 @@ async def get_session_messages(
   session = agent.get_session(session_id=session_id)
   if session is None:
     return []
-  messages = agent.get_session_messages(session_id=session_id, last_n_runs=last_runs, skip_history_messages=True)
-  return convert_agno_to_copilotkit([m.model_dump() for m in messages ])
+
+  messages = agent.get_session_messages(
+    session_id=session_id, last_n_runs=last_runs, skip_history_messages=True
+  )
+  return convert_agno_to_copilotkit([m.model_dump() for m in messages])
