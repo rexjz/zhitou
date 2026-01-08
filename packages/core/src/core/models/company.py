@@ -11,9 +11,7 @@ class CompanyModel(BaseModel):
     company_code: str
     full_name: str
     short_name: str
-    # others
-    created_at: datetime
-    updated_at: datetime
+
 
     @classmethod
     def from_orm_model(cls, orm_model) -> "CompanyModel":
