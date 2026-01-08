@@ -6,7 +6,6 @@ from core.models.report_file import (
     AnnouncementFileModel, 
     CreateAnnouncementFileDto, 
     UpdateAnnouncementFileDto,
-    ReportStatus,
     AnnouncementType
 )
 from database.src.database.orm_models.report_file import ChinaCompanyAnnouncementFileOrm
@@ -25,8 +24,6 @@ class AnnouncementFileWithCompany:
         self.report_year = announcement.report_year
         self.announcement_type = announcement.announcement_type
         self.file_path = announcement.file_path
-        self.report_status = announcement.report_status
-        self.publish_date = announcement.publish_date
         self.display_name = AnnouncementType.get_display_name(
             announcement.announcement_type, 
             announcement.report_year
