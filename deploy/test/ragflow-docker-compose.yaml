@@ -1,0 +1,189 @@
+services:
+  sandbox-executor-manager:
+    profiles:
+      - sandbox
+    image: ${SANDBOX_EXECUTOR_MANAGER_IMAGE-infiniflow/sandbox-executor-manager:latest}
+    privileged: true
+    ports:
+      - ${SANDBOX_EXECUTOR_MANAGER_PORT-9385}:9385
+    env_file: .env
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      - SANDBOX_EXECUTOR_MANAGER_POOL_SIZE=${SANDBOX_EXECUTOR_MANAGER_POOL_SIZE:-3}
+      - SANDBOX_BASE_PYTHON_IMAGE=${SANDBOX_BASE_PYTHON_IMAGE:-infiniflow/sandbox-base-python:latest}
+      - SANDBOX_BASE_NODEJS_IMAGE=${SANDBOX_BASE_NODEJS_IMAGE:-infiniflow/sandbox-base-nodejs:latest}
+      - SANDBOX_ENABLE_SECCOMP=${SANDBOX_ENABLE_SECCOMP:-false}
+      - SANDBOX_MAX_MEMORY=${SANDBOX_MAX_MEMORY:-256m}
+      - SANDBOX_TIMEOUT=${SANDBOX_TIMEOUT:-10s}
+    healthcheck:
+      test: ["CMD", "curl", "http://localhost:9385/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: on-failure
+
+  ragflow_mysql:
+    # mysql:5.7 linux/arm64 image is unavailable.
+    image: mysql:8.0.39
+    env_file: .env
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD}
+    command:
+      --max_connections=1000
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --default-authentication-plugin=mysql_native_password
+      --tls_version="TLSv1.2,TLSv1.3"
+      --init-file /data/application/init.sql
+      --binlog_expire_logs_seconds=604800
+    ports:
+      - ${MYSQL_PORT}:3306
+    volumes:
+      - ragflow_mysql_data:/var/lib/mysql
+      - ./init.sql:/data/application/init.sql
+
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-uroot", "-p${MYSQL_PASSWORD}"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+    restart: on-failure
+
+  ragflow-minio:
+    image: quay.io/minio/minio:RELEASE.2025-06-13T11-33-47Z
+    command: server --console-address ":9001" /data
+    ports:
+      - ${MINIO_PORT}:9000
+      - ${MINIO_CONSOLE_PORT}:9001
+    env_file: .env
+    environment:
+      - MINIO_ROOT_USER=${MINIO_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_PASSWORD}
+    volumes:
+      - ragflow_minio_data:/data
+
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+  
+  tei-cpu:
+    profiles:
+      - tei-cpu
+    image: ${TEI_IMAGE_CPU}
+    hostname: tei
+    ports:
+      - ${TEI_PORT-6380}:80
+    env_file: .env
+
+    command: ["--model-id", "/data/${TEI_MODEL}", "--auto-truncate"]
+    restart: on-failure
+
+
+  tei-gpu:
+    profiles:
+      - tei-gpu
+    image: ${TEI_IMAGE_GPU}
+    hostname: tei
+    ports:
+      - ${TEI_PORT-6380}:80
+    env_file: .env
+
+    command: ["--model-id", "/data/${TEI_MODEL}", "--auto-truncate"]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: on-failure
+
+
+  ragflow-cpu:
+    depends_on:
+      ragflow_mysql:
+        condition: service_healthy
+    profiles:
+      - cpu
+    image: ${RAGFLOW_IMAGE}
+    env_file: .env
+    # Example configuration to set up an MCP server:
+    # command:
+    #   - --enable-mcpserver
+    #   - --mcp-host=0.0.0.0
+    #   - --mcp-port=9382
+    #   - --mcp-base-url=http://127.0.0.1:9380
+    #   - --mcp-script-path=/ragflow/mcp/server/server.py
+    #   - --mcp-mode=self-host
+    #   - --mcp-host-api-key=ragflow-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    # Optional transport flags for MCP (customize if needed).
+    # Host mode need to combined with --no-transport-streamable-http-enabled flag, namely, host+streamable-http is not supported yet.
+    # The following are enabled by default unless explicitly disabled with --no-<flag>.
+    #   - --no-transport-sse-enabled # Disable legacy SSE endpoints (/sse and /messages/)
+    #   - --no-transport-streamable-http-enabled #  Disable Streamable HTTP transport (/mcp endpoint)
+    #   - --no-json-response # Disable JSON response mode in Streamable HTTP transport (instead of SSE over HTTP)
+
+    # Example configration to start Admin server:
+    # command:
+    #   - --enable-adminserver
+    ports:
+      - ${SVR_WEB_HTTP_PORT}:80
+      - ${SVR_WEB_HTTPS_PORT}:443
+      - ${SVR_HTTP_PORT}:9380
+      - ${ADMIN_SVR_HTTP_PORT}:9381
+      - ${SVR_MCP_PORT}:9382 # entry for MCP (host_port:docker_port). The docker_port must match the value you set for `mcp-port` above.
+    volumes:
+      - ./ragflow-logs:/ragflow/logs
+      - ./nginx/ragflow.conf:/etc/nginx/conf.d/ragflow.conf
+      - ./nginx/proxy.conf:/etc/nginx/proxy.conf
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ../history_data_agent:/ragflow/history_data_agent
+      - ./service_conf.yaml.template:/ragflow/conf/service_conf.yaml.template
+      - ./entrypoint.sh:/ragflow/entrypoint.sh
+    
+
+    restart: on-failure
+    # https://docs.docker.com/engine/daemon/prometheus/#create-a-prometheus-configuration
+    # If you use Docker Desktop, the --add-host flag is optional. This flag ensures that the host's internal IP is exposed to the Prometheus container.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+  
+
+  redis:
+    # swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/valkey/valkey:8
+    image: valkey/valkey:8
+    command: redis-server --requirepass infini_rag_flow --maxmemory 128mb --maxmemory-policy allkeys-lru
+    env_file: .env
+    # ports:
+    #   - ${REDIS_PORT}:6379
+    volumes:
+      - ragflow_redis_data:/data
+
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 10s    
+
+volumes:
+  ragflow_esdata01:
+    driver: local
+  ragflow_mysql_data:
+    driver: local
+  ragflow_minio_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${RAGFLOW_MINIO_DISK_ROOT:-/var/lib}/ragflow/minio}
+  ragflow_redis_data:
+    driver: local

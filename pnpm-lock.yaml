@@ -6,14 +6,7 @@ settings:
 
 importers:
 
-  .:
-    dependencies:
-      axios:
-        specifier: ^1.13.2
-        version: 1.13.2
-      swr:
-        specifier: ^2.3.8
-        version: 2.3.8(react@18.3.1)
+  .: {}
 
   pnpm_packages/copilotkit-server:
     dependencies:
@@ -32,9 +25,6 @@ importers:
       express:
         specifier: ^5.2.1
         version: 5.2.1
-      hono:
-        specifier: ^4.11.3
-        version: 4.11.3
     devDependencies:
       '@types/cors':
         specifier: ^2.8.19
@@ -84,6 +74,9 @@ importers:
       antd:
         specifier: ^5.11.2
         version: 5.29.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      axios:
+        specifier: ^1.13.2
+        version: 1.13.2
       better-auth:
         specifier: ^1.4.3
         version: 1.4.9(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -114,6 +107,9 @@ importers:
       sonner:
         specifier: ^2.0.7
         version: 2.0.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      swr:
+        specifier: ^2.3.8
+        version: 2.3.8(react@18.3.1)
       tailwind-merge:
         specifier: ^3.4.0
         version: 3.4.0
