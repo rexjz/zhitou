@@ -1,19 +1,21 @@
-# The build context should be ./pnpm_packages/copilotkit-server
+# The build context should be project root
 FROM node:20-alpine
 
 WORKDIR /app
 ENV NODE_ENV=production
 
 RUN corepack enable
-COPY ./package.json ./pnpm-lock.yaml ./
+COPY ./package.json ./pnpm-lock.yaml ./pnpm-workspace.yaml ./
+COPY ./pnpm_packages/copilotkit-server/package.json ./pnpm_packages/copilotkit-server/package.json
 
 RUN id=pnpm-store,target=/root/.local/share/pnpm/store \
     pnpm install --frozen-lockfile
 
-COPY . .
-RUN pnpm run build
+COPY ./pnpm_packages/copilotkit-server ./pnpm_packages/copilotkit-server
+RUN pnpm -F copilotkit-server run build
 
 RUN pnpm prune --prod
 
 EXPOSE 6010
-CMD ["node", "dist/index.js"]
+
+CMD ["node", "./pnpm_packages/copilotkit-server/dist/index.js"]
