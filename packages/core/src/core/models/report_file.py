@@ -1,6 +1,4 @@
 from pydantic import BaseModel, ConfigDict
-from datetime import datetime, date
-from decimal import Decimal
 from typing import Optional
 from enum import Enum
 
@@ -34,7 +32,8 @@ class AnnouncementFileModel(BaseModel):
     id: int
     company_id: int
     report_year: int
-    report_file_path: Optional[str] = None
+    announcement_type: str
+    file_path: Optional[str] = None
     
 
     @classmethod
@@ -47,11 +46,11 @@ class CreateAnnouncementFileDto(BaseModel):
     """创建年报文件 DTO"""
     company_id: int
     report_year: int
-    report_file_path: Optional[str] = None
-
+    announcement_type: str
+    file_path: Optional[str] = None
 
 
 class UpdateAnnouncementFileDto(BaseModel):
     """更新年报文件 DTO"""
-    report_file_path: Optional[str] = None
+    file_path: Optional[str] = None
     

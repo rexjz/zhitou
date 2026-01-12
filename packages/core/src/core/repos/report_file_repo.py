@@ -8,8 +8,8 @@ from core.models.report_file import (
     UpdateAnnouncementFileDto,
     AnnouncementType
 )
-from database.src.database.orm_models.report_file import ChinaCompanyAnnouncementFileOrm
-from database.src.database.orm_models.company import ChinaCompanyOrm
+from database.orm_models.report_file import ChinaCompanyAnnouncementFileOrm
+from database.orm_models.company import ChinaCompanyOrm
 from .repo import SyncRepository, PageResult
 
 

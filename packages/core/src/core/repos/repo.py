@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from sqlalchemy import Select, func, select
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import ColumnElement
-from database.src.database.orm_models.base import Base
+from database.orm_models.base import Base
 
 ModelT = TypeVar("ModelT", bound=Base)
 DomainModelT = TypeVar("DomainModelT", bound=BaseModel)
