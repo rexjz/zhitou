@@ -8,7 +8,11 @@ from core.config.models import DatabaseConfig, LoggingConfig
 from core.db_manager import DatabaseManager
 from core.error.biz_error import BizError, BizErrorCode
 from core.repos.user_repo import UserRepositoryImpl
+from core.repos.company_repo import CompanyRepositoryImpl
+from core.repos.report_file_repo import AnnouncementFileRepositoryImpl
 from api.services.user import UserServiceImpl
+from api.services.company import CompanyServiceImpl
+from api.services.report_file import ReportFileServiceImpl
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from loguru import logger
@@ -16,6 +20,8 @@ from api.handlers.auth import auth_router
 from api.handlers.user import user_router
 from api.handlers.system import system_router
 from api.handlers.agent import agent_app
+from api.handlers.company import company_router
+from api.handlers.report_file import report_file_router
 
 import uvicorn
 from zhitou_agent.agent.agno import create_agent_db
@@ -44,6 +50,8 @@ def init_repositories_state(db_config: DatabaseConfig) -> RepositoriesState:
   return RepositoriesState(
     user_repo=UserRepositoryImpl(),
     agent_repo=AgentRepositoryImpl(db=create_agent_db(db_config)),
+    company_repo=CompanyRepositoryImpl(),
+    report_file_repo=AnnouncementFileRepositoryImpl(),
   )
 
 
@@ -60,6 +68,8 @@ async def lifespan(app: FastAPI):
   repositories = init_repositories_state(db_config=config.database)
   services = ServicesState(
     user_service=UserServiceImpl(user_repo=repositories.user_repo),
+    company_service=CompanyServiceImpl(company_repo=repositories.company_repo),
+    report_file_service=ReportFileServiceImpl(report_file_repo=repositories.report_file_repo),
   )
   app.state.state = AppState(
     config=config, db_manager=db_manager, repositories=repositories, services=services
@@ -97,6 +107,8 @@ app.include_router(system_router)
 app.include_router(auth_router, prefix="/api/auth")
 app.include_router(user_router, prefix="/api/user")
 app.include_router(agent_app, prefix="/api/agent")
+app.include_router(company_router, prefix="/api/company")
+app.include_router(report_file_router, prefix="/api/report-file")
 
 app.add_middleware(RequestStateMiddleware)
 

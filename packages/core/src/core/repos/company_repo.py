@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_
 
 from core.models.company import CompanyModel, CreateCompanyDto, UpdateCompanyDto
-from database.src.database.orm_models.company import ChinaCompanyOrm
+from database.orm_models.company import ChinaCompanyOrm
 from .repo import SyncRepository, PageResult
 
 

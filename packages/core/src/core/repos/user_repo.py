@@ -1,6 +1,6 @@
 from core.models.user import UserModel, CreatePasswordAuthUserDto
 from .repo import SyncRepository
-from database.src.database.orm_models.user import UserOrmModel, UserPasswordOrmModel
+from database.orm_models.user import UserOrmModel, UserPasswordOrmModel
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import NoResultFound
 from uuid import UUID
