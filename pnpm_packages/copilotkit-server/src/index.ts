@@ -25,8 +25,7 @@ class DynamicHeaderAgent extends AgnoAgent {
       ...init,
       headers: {
         ...init.headers,
-        ...dynamicHeaders,  // 把你的 header 注入进去
-        "Accept-Encoding": "identity",
+        ...dynamicHeaders
       },
     };
     console.log(request)

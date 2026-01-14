@@ -9,7 +9,7 @@ import { ThinkToolCallRenderer } from "@/components/ToolCall/think";
 import "@copilotkit/react-ui/styles.css";
 import { useAgent } from "@copilotkitnext/react";
 // import { ActionExecutionMessage, ResultMessage, TextMessage } from "@copilotkit/runtime-client-gql";
-import { useGetSessionMessages } from "@/sdk/agent/agent";
+import { getSessionMessages } from "@/sdk/agent/agent";
 import SessionListView from "@/components/AgentChat/SessionListView";
 import type { SessionData } from "@/sdk/models/sessionData";
 import { useCopilotMessagesContext } from "@copilotkit/react-core";
@@ -25,6 +25,20 @@ const BasicChatPage: React.FC = () => {
     const sessionFromUrl = params.get("sessionId");
     return sessionFromUrl || generateSessionId();
   });
+
+  // Handle browser back/forward navigation
+  useEffect(() => {
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const sessionFromUrl = params.get("sessionId");
+      if (sessionFromUrl && sessionFromUrl !== currentSessionId) {
+        setCurrentSessionId(sessionFromUrl);
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [currentSessionId]);
 
   const handleSessionClick = (session: SessionData) => {
     setCurrentSessionId(session.session_id);
@@ -83,6 +97,7 @@ const BasicChatPage: React.FC = () => {
       {/* Chat Area */}
       <div style={{ flex: 1, overflow: "hidden" }}>
         <CopilotKit
+          key={currentSessionId}
           runtimeUrl="/proxy/copilotkit"
           showDevConsole
           agent="default"
@@ -93,10 +108,9 @@ const BasicChatPage: React.FC = () => {
             WebSeachToolCallRenderer,
             ThinkToolCallRenderer
           ]}
-          // key={currentSessionId}
-        // threadId={currentSessionId}
+          threadId={currentSessionId}
         >
-          <ChatProvider sessionId={currentSessionId} />
+          <ChatProvider key={currentSessionId} sessionId={currentSessionId} />
         </CopilotKit>
       </div>
     </div>
@@ -106,47 +120,30 @@ const BasicChatPage: React.FC = () => {
 // ChatProvider sits inside CopilotKit and creates the shared agent instance
 const ChatProvider = ({ sessionId }: { sessionId: string }) => {
   const { agent } = useAgent({ agentId: 'default' });
-
   return <Chat sessionId={sessionId} agent={agent} />;
 };
 
 const Chat = ({ sessionId, agent }: { sessionId: string; agent: ReturnType<typeof useAgent>['agent'] }) => {
-  const { data, isLoading: apiLoading } = useGetSessionMessages(sessionId)
   const hasLoadedHistory = useRef(false);
-  const lastLoadedSessionId = useRef<string | null>(null);
-  const loadingStartTime = useRef<number | null>(null);
-  const [isMinLoadingTime, setIsMinLoadingTime] = useState(true);
-
-  // Ensure minimum loading time of 3 seconds
-  const isLoading = apiLoading || isMinLoadingTime;
-
-  console.log("agent.messages: ", agent.messages)
-  console.log("agent.isRunning: ", agent.isRunning)
-
-  // Reset loaded flag and start loading timer when session changes
-  useEffect(() => {
-    if (lastLoadedSessionId.current !== sessionId) {
-      hasLoadedHistory.current = false;
-      lastLoadedSessionId.current = sessionId;
-      loadingStartTime.current = Date.now();
-      setIsMinLoadingTime(true);
-
-      // Set minimum loading time of 3 seconds
-      const timer = setTimeout(() => {
-        setIsMinLoadingTime(false);
-      }, 3000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [sessionId]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (!agent.isRunning && !isLoading && data && !hasLoadedHistory.current) {
-      console.log("Loading history for session:", sessionId, data.data)
-      agent.setMessages(data?.data as any)
-      hasLoadedHistory.current = true;
+    if (agent.threadId === sessionId && !hasLoadedHistory.current && !isLoading) {
+      setIsLoading(true);
+      getSessionMessages(sessionId)
+        .then((response) => {
+          console.log("Loading history for session:", sessionId, response.data)
+          agent.setMessages(response.data as any)
+          hasLoadedHistory.current = true;
+        })
+        .catch((error) => {
+          console.error("Failed to load session messages:", error);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
     }
-  }, [agent, agent.isRunning, isLoading, data, sessionId]);
+  }, [agent.threadId, sessionId, isLoading]);
 
   return (
     <div className="h-[calc(100vh-152px)] w-full rounded-lg" style={{ position: 'relative' }}>

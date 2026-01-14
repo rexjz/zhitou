@@ -18,6 +18,7 @@ run = [
 [tasks.dev-web]
 run = "pnpm --filter web gen && pnpm --filter web dev"
 
+
 [tasks.agent-cli]
 run = "uv run --package zhitou_agent zhitou-agent-cli"
 
@@ -27,7 +28,8 @@ run = "uv run --package zhitou_agent zhitou-agent-history"
 [tasks.dev-api]
 run = [
   "uv run api-dev &",
-  "pnpm -F copilotkit-server dev"
+  # "pnpm -F copilotkit-server dev"
+  "pnpm -F nextjs-copilotkit-server dev --port 6010"
 ]
 
 [tasks.fastapi-dev]
