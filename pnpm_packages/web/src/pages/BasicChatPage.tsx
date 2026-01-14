@@ -93,29 +93,50 @@ const BasicChatPage: React.FC = () => {
             WebSeachToolCallRenderer,
             ThinkToolCallRenderer
           ]}
-          key={currentSessionId}
+          // key={currentSessionId}
         // threadId={currentSessionId}
         >
-          <Chat key={currentSessionId} sessionId={currentSessionId} />
+          <ChatProvider sessionId={currentSessionId} />
         </CopilotKit>
       </div>
     </div>
   );
 };
 
-const Chat = ({ sessionId }: { sessionId: string }) => {
-  // const { agent } = useAgent({ agentId: "default" });
-  const { data, isLoading } = useGetSessionMessages(sessionId)
+// ChatProvider sits inside CopilotKit and creates the shared agent instance
+const ChatProvider = ({ sessionId }: { sessionId: string }) => {
+  const { agent } = useAgent({ agentId: 'default' });
+
+  return <Chat sessionId={sessionId} agent={agent} />;
+};
+
+const Chat = ({ sessionId, agent }: { sessionId: string; agent: ReturnType<typeof useAgent>['agent'] }) => {
+  const { data, isLoading: apiLoading } = useGetSessionMessages(sessionId)
   const hasLoadedHistory = useRef(false);
   const lastLoadedSessionId = useRef<string | null>(null);
-  const { agent } = useAgent({ agentId: 'default' })
+  const loadingStartTime = useRef<number | null>(null);
+  const [isMinLoadingTime, setIsMinLoadingTime] = useState(true);
+
+  // Ensure minimum loading time of 3 seconds
+  const isLoading = apiLoading || isMinLoadingTime;
+
   console.log("agent.messages: ", agent.messages)
   console.log("agent.isRunning: ", agent.isRunning)
-  // Reset loaded flag when session changes
+
+  // Reset loaded flag and start loading timer when session changes
   useEffect(() => {
     if (lastLoadedSessionId.current !== sessionId) {
       hasLoadedHistory.current = false;
       lastLoadedSessionId.current = sessionId;
+      loadingStartTime.current = Date.now();
+      setIsMinLoadingTime(true);
+
+      // Set minimum loading time of 3 seconds
+      const timer = setTimeout(() => {
+        setIsMinLoadingTime(false);
+      }, 3000);
+
+      return () => clearTimeout(timer);
     }
   }, [sessionId]);
 
@@ -125,7 +146,7 @@ const Chat = ({ sessionId }: { sessionId: string }) => {
       agent.setMessages(data?.data as any)
       hasLoadedHistory.current = true;
     }
-  }, [agent.isRunning, isLoading, data, sessionId]);
+  }, [agent, agent.isRunning, isLoading, data, sessionId]);
 
   return (
     <div className="h-[calc(100vh-152px)] w-full rounded-lg" style={{ position: 'relative' }}>

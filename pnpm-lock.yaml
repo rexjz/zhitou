@@ -10,6 +10,9 @@ importers:
 
   pnpm_packages/copilotkit-server:
     dependencies:
+      '@ag-ui/agno':
+        specifier: ^0.0.3
+        version: 0.0.3(@ag-ui/client@0.0.42)(@ag-ui/core@0.0.42)(rxjs@7.8.1)
       '@ag-ui/client':
         specifier: ^0.0.42
         version: 0.0.42
@@ -202,6 +205,13 @@ packages:
     peerDependenciesMeta:
       graphql:
         optional: true
+
+  '@ag-ui/agno@0.0.3':
+    resolution: {integrity: sha512-LjuEJIfc+PGBpPxCxwK+hhMoSiqdhOcOkDusApuysglxhadlXmfIl+ycIs2io5sndeZevV3L9xHFkEgmnjE39Q==}
+    peerDependencies:
+      '@ag-ui/client': '>=0.0.37'
+      '@ag-ui/core': '>=0.0.37'
+      rxjs: 7.8.1
 
   '@ag-ui/client@0.0.42':
     resolution: {integrity: sha512-zAbP+sZJImR5bUpR2ni7RtuuNZMuesaxviynyIgzKlr1k2VCM49mFpbDUKU4TH4Cneu+Xe7OEnO8qCOCIzBAww==}
@@ -8282,6 +8292,12 @@ snapshots:
   '@0no-co/graphql.web@1.2.0(graphql@16.12.0)':
     optionalDependencies:
       graphql: 16.12.0
+
+  '@ag-ui/agno@0.0.3(@ag-ui/client@0.0.42)(@ag-ui/core@0.0.42)(rxjs@7.8.1)':
+    dependencies:
+      '@ag-ui/client': 0.0.42
+      '@ag-ui/core': 0.0.42
+      rxjs: 7.8.1
 
   '@ag-ui/client@0.0.42':
     dependencies:
