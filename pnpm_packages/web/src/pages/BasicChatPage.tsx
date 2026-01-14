@@ -6,13 +6,14 @@ import { CopilotKit } from "@copilotkit/react-core";
 
 import { WebSeachToolCallRenderer } from "@/components/ToolCall/web_search";
 import { ThinkToolCallRenderer } from "@/components/ToolCall/think";
-import { CopilotChat } from "@copilotkit/react-ui";
 import "@copilotkit/react-ui/styles.css";
 import { useAgent } from "@copilotkitnext/react";
 // import { ActionExecutionMessage, ResultMessage, TextMessage } from "@copilotkit/runtime-client-gql";
 import { useGetSessionMessages } from "@/sdk/agent/agent";
 import SessionListView from "@/components/AgentChat/SessionListView";
 import type { SessionData } from "@/sdk/models/sessionData";
+import { useCopilotMessagesContext } from "@copilotkit/react-core";
+import { CopilotChat } from "@copilotkit/react-ui";
 
 const generateSessionId = () => {
   return `session_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
@@ -93,7 +94,7 @@ const BasicChatPage: React.FC = () => {
             ThinkToolCallRenderer
           ]}
           key={currentSessionId}
-          threadId={currentSessionId}
+        // threadId={currentSessionId}
         >
           <Chat key={currentSessionId} sessionId={currentSessionId} />
         </CopilotKit>
@@ -103,20 +104,28 @@ const BasicChatPage: React.FC = () => {
 };
 
 const Chat = ({ sessionId }: { sessionId: string }) => {
-
-  const { agent } = useAgent({ agentId: "default" });
-
+  // const { agent } = useAgent({ agentId: "default" });
   const { data, isLoading } = useGetSessionMessages(sessionId)
   const hasLoadedHistory = useRef(false);
+  const lastLoadedSessionId = useRef<string | null>(null);
+  const { agent } = useAgent({ agentId: 'default' })
+  console.log("agent.messages: ", agent.messages)
+  console.log("agent.isRunning: ", agent.isRunning)
+  // Reset loaded flag when session changes
+  useEffect(() => {
+    if (lastLoadedSessionId.current !== sessionId) {
+      hasLoadedHistory.current = false;
+      lastLoadedSessionId.current = sessionId;
+    }
+  }, [sessionId]);
 
   useEffect(() => {
     if (!agent.isRunning && !isLoading && data && !hasLoadedHistory.current) {
-      console.log(data.data)
+      console.log("Loading history for session:", sessionId, data.data)
       agent.setMessages(data?.data as any)
       hasLoadedHistory.current = true;
     }
-  }, [agent, agent.isRunning, isLoading, data]);
-
+  }, [agent.isRunning, isLoading, data, sessionId]);
 
   return (
     <div className="h-[calc(100vh-152px)] w-full rounded-lg" style={{ position: 'relative' }}>
@@ -140,7 +149,7 @@ const Chat = ({ sessionId }: { sessionId: string }) => {
           zIndex: 1000,
           pointerEvents: 'all'
         }}>
-          <Spin size="large" tip="加载会话消息中..." />
+          <Spin size="large" />
         </div>
       )}
     </div>
