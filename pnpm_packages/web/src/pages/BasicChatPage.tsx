@@ -6,13 +6,14 @@ import { CopilotKit } from "@copilotkit/react-core";
 
 import { WebSeachToolCallRenderer } from "@/components/ToolCall/web_search";
 import { ThinkToolCallRenderer } from "@/components/ToolCall/think";
-import { CopilotChat } from "@copilotkit/react-ui";
 import "@copilotkit/react-ui/styles.css";
 import { useAgent } from "@copilotkitnext/react";
 // import { ActionExecutionMessage, ResultMessage, TextMessage } from "@copilotkit/runtime-client-gql";
-import { useGetSessionMessages } from "@/sdk/agent/agent";
+import { getSessionMessages } from "@/sdk/agent/agent";
 import SessionListView from "@/components/AgentChat/SessionListView";
 import type { SessionData } from "@/sdk/models/sessionData";
+import { useCopilotMessagesContext } from "@copilotkit/react-core";
+import { CopilotChat } from "@copilotkit/react-ui";
 
 const generateSessionId = () => {
   return `session_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
@@ -24,6 +25,20 @@ const BasicChatPage: React.FC = () => {
     const sessionFromUrl = params.get("sessionId");
     return sessionFromUrl || generateSessionId();
   });
+
+  // Handle browser back/forward navigation
+  useEffect(() => {
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const sessionFromUrl = params.get("sessionId");
+      if (sessionFromUrl && sessionFromUrl !== currentSessionId) {
+        setCurrentSessionId(sessionFromUrl);
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [currentSessionId]);
 
   const handleSessionClick = (session: SessionData) => {
     setCurrentSessionId(session.session_id);
@@ -82,6 +97,7 @@ const BasicChatPage: React.FC = () => {
       {/* Chat Area */}
       <div style={{ flex: 1, overflow: "hidden" }}>
         <CopilotKit
+          key={currentSessionId}
           runtimeUrl="/proxy/copilotkit"
           showDevConsole
           agent="default"
@@ -92,31 +108,42 @@ const BasicChatPage: React.FC = () => {
             WebSeachToolCallRenderer,
             ThinkToolCallRenderer
           ]}
-          key={currentSessionId}
           threadId={currentSessionId}
         >
-          <Chat key={currentSessionId} sessionId={currentSessionId} />
+          <ChatProvider key={currentSessionId} sessionId={currentSessionId} />
         </CopilotKit>
       </div>
     </div>
   );
 };
 
-const Chat = ({ sessionId }: { sessionId: string }) => {
+// ChatProvider sits inside CopilotKit and creates the shared agent instance
+const ChatProvider = ({ sessionId }: { sessionId: string }) => {
+  const { agent } = useAgent({ agentId: 'default' });
+  return <Chat sessionId={sessionId} agent={agent} />;
+};
 
-  const { agent } = useAgent({ agentId: "default" });
-
-  const { data, isLoading } = useGetSessionMessages(sessionId)
+const Chat = ({ sessionId, agent }: { sessionId: string; agent: ReturnType<typeof useAgent>['agent'] }) => {
   const hasLoadedHistory = useRef(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (!agent.isRunning && !isLoading && data && !hasLoadedHistory.current) {
-      console.log(data.data)
-      agent.setMessages(data?.data as any)
-      hasLoadedHistory.current = true;
+    if (agent.threadId === sessionId && !hasLoadedHistory.current && !isLoading) {
+      setIsLoading(true);
+      getSessionMessages(sessionId)
+        .then((response) => {
+          console.log("Loading history for session:", sessionId, response.data)
+          agent.setMessages(response.data as any)
+          hasLoadedHistory.current = true;
+        })
+        .catch((error) => {
+          console.error("Failed to load session messages:", error);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
     }
-  }, [agent, agent.isRunning, isLoading, data]);
-
+  }, [agent.threadId, sessionId, isLoading]);
 
   return (
     <div className="h-[calc(100vh-152px)] w-full rounded-lg" style={{ position: 'relative' }}>
@@ -140,7 +167,7 @@ const Chat = ({ sessionId }: { sessionId: string }) => {
           zIndex: 1000,
           pointerEvents: 'all'
         }}>
-          <Spin size="large" tip="加载会话消息中..." />
+          <Spin size="large" />
         </div>
       )}
     </div>

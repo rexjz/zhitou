@@ -5,6 +5,7 @@ import {
   ExperimentalEmptyAdapter
 } from "@copilotkit/runtime";
 import { HttpAgent, type RunAgentInput } from "@ag-ui/client";
+import { AgnoAgent } from "@ag-ui/agno";
 import cors from "cors";
 
 const app = express();
@@ -13,7 +14,7 @@ app.use(cors({
   origin: "http://localhost:6009",
 }));
 
-class DynamicHeaderAgent extends HttpAgent {
+class DynamicHeaderAgent extends AgnoAgent {
   protected requestInit(input: RunAgentInput) {
     const dynamicHeaders = (input.forwardedProps?.forwardedHeaders) || {};
 
@@ -24,8 +25,7 @@ class DynamicHeaderAgent extends HttpAgent {
       ...init,
       headers: {
         ...init.headers,
-        ...dynamicHeaders,  // 把你的 header 注入进去
-        "Accept-Encoding": "identity",
+        ...dynamicHeaders
       },
     };
     console.log(request)
